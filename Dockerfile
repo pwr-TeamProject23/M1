@@ -10,4 +10,6 @@ RUN poetry install
 
 COPY . .
 
-CMD ["uvicorn", "rms.__main__:app", "--reload"]
+EXPOSE 8000
+
+CMD ["uvicorn", "rms.__main__:app", "--port=8000", "--host=0.0.0.0"]
