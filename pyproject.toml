@@ -1,0 +1,31 @@
+[tool.poetry]
+name = "reviewer matching system - rms"
+version = "0.1.0"
+description = "System for recommending reviewers for a supplied scientific paper"
+authors = [
+    "Philip Policki <philip.policki@gmail.com>",
+    "Jakub Syska <jaksyska@gmail.com>",
+    "Jan Krokos <jankrokos@gmail.com>",
+]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = {extras = ["all"], version = "^0.103.2"}
+
+
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.0.292"
+black = "^23.9.1"
+
+[tool.black]
+line-length = 120
+
+
+[tool.ruff]
+line-length = 120
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
