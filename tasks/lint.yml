@@ -1,0 +1,14 @@
+version: 3
+
+tasks:
+
+  black:
+    cmd: black .
+
+  ruff:
+    cmd: ruff .
+
+  all:
+    cmds:
+      - task: black
+      - task: ruff

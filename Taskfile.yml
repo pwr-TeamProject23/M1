@@ -1,0 +1,5 @@
+version: 3
+
+includes:
+  lint: tasks/lint.yml
+  backend: tasks/backend.yml
