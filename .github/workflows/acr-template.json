@@ -1,0 +1,41 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+      "acrName": {
+        "type": "string",
+        "metadata": {
+          "description": "Name of the Azure Container Registry"
+        }
+      }
+    },
+    "resources": [
+      {
+        "type": "Microsoft.ContainerRegistry/registries",
+        "apiVersion": "2023-06-01-preview",
+        "name": "[parameters('acrName')]",
+        "location": "[resourceGroup().location]",
+        "sku": {
+          "name": "Basic"
+        },
+        "properties": {
+          "adminUserEnabled": true
+        }
+      }
+    ],
+    "outputs": {
+      "acrLoginServer": {
+        "value": "[reference(resourceId('Microsoft.ContainerRegistry/registries',parameters('acrName')),'2023-06-01-preview').loginServer]",
+        "type": "string"
+      },
+      "registryUsername": {
+        "value": "[parameters('acrName')]",
+        "type": "string"
+      },
+      "registryPassword": {
+        "value": "[listCredentials(resourceId('Microsoft.ContainerRegistry/registries',parameters('acrName')),'2023-06-01-preview').passwords[0].value]",
+        "type": "string"
+      }
+    }
+  }
+  
