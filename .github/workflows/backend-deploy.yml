@@ -1,0 +1,62 @@
+name: Backend deployment
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@master
+
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Deploy ACR
+        id: deploy_acr
+        uses: azure/arm-deploy@v1
+        with:
+          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION }}
+          resourceGroupName: ${{ vars.AZURE_RG }}
+          template: ./.github/workflows/acr-template.json
+          parameters: acrName=${{ vars.AZURE_ACR_NAME}}
+
+      - name: Deploy App Service and Web App
+        uses: azure/arm-deploy@v1
+        with:
+          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION }}
+          resourceGroupName: ${{ vars.AZURE_RG }}
+          template: ./.github/workflows/appservice-template.json
+          parameters: acrName=${{ vars.AZURE_ACR_NAME}} appServicePlanName=${{ vars.AZURE_APP_SERVICEPLAN_NAME }} webAppName=${{ vars.AZURE_WEBAPP_NAME }} imageName=${{ vars.IMAGE_TAG }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build Docker image
+        run: |
+          docker build . -t ${{ steps.deploy_acr.outputs.acrLoginServer }}/${{ vars.IMAGE_TAG }}:${{ github.sha }}
+
+      - name: Login to ACR
+        uses: azure/docker-login@v1
+        with:
+          login-server: ${{ steps.deploy_acr.outputs.acrLoginServer }}
+          username: ${{ steps.deploy_acr.outputs.registryUsername }}
+          password: ${{ steps.deploy_acr.outputs.registryPassword }}
+
+      - name: Push Docker image to ACR
+        run: |
+          docker push ${{ steps.deploy_acr.outputs.acrLoginServer }}/${{ vars.IMAGE_TAG }}:${{ github.sha }}
+
+      - name: Update Web App Image
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ vars.AZURE_WEBAPP_NAME }}
+          images: ${{ steps.deploy_acr.outputs.acrLoginServer }}/${{ vars.IMAGE_TAG }}:${{ github.sha }}
+
+      - name: Azure logout
+        run: |
+          az logout

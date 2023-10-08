@@ -19,6 +19,12 @@
       "metadata": {
         "description": "Name of the Azure Container Registry"
       }
+    },
+    "imageName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the rms image"
+      }
     }
   },
   "resources": [
@@ -46,7 +52,7 @@
       "properties": {
         "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('appServicePlanName'))]",
         "siteConfig": {
-          "linuxFxVersion": "[concat('DOCKER|', parameters('acrName'), '.azurecr.io/fastapi_app:latest')]"
+          "linuxFxVersion": "[concat('DOCKER|', parameters('acrName'), '.azurecr.io/', parameters('imageName'), ':latest')]"
         }
       }
     }
