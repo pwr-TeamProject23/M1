@@ -1,3 +1,4 @@
+// @ts-ignore
 import * as React from "react"
 import { createBrowserRouter } from "react-router-dom"
 import { HomePage } from "./views/HomePage.tsx"
