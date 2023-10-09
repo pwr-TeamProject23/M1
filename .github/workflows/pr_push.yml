@@ -1,0 +1,59 @@
+name: "Branch Push"
+
+on:
+  push:
+    branches:
+      - "**"
+
+jobs:
+  lint_and_test_python:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Create secrets
+        run: cp .env.sample .env
+
+      - name: Build image
+        run: docker build --target dev . -t rms:latest
+
+      - name: Start Backend
+        run: docker compose up -d
+
+      - name: Lint Black
+        run: docker compose run --rm backend sh -c "poetry run black ."
+
+      - name: Lint Black
+        run: docker compose run --rm backend sh -c "poetry run ruff ."
+
+      - name: Test python
+        run: docker compose run --rm backend sh -c "poetry run pytest ."
+
+  lint_and_test_web:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18.x
+
+      - name: Install dependencies
+        working-directory: ./rms_fe
+        run: npm install
+
+      - name: Lint
+        working-directory: ./rms_fe
+        run: npm run lint
+
+#      - name: Test
+#        working-directory: ./rms_fe
+#        run: npm run test
+
+      - name: Build
+        working-directory: ./rms_fe
+        run: npm run build
