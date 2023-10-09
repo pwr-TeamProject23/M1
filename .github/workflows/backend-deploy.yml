@@ -38,7 +38,7 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build . -t ${{ steps.deploy_acr.outputs.acrLoginServer }}/${{ vars.IMAGE_TAG }}:${{ github.sha }}
+          docker build --target prod . -t ${{ steps.deploy_acr.outputs.acrLoginServer }}/${{ vars.IMAGE_TAG }}:${{ github.sha }}
 
       - name: Login to ACR
         uses: azure/docker-login@v1
