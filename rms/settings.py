@@ -5,3 +5,4 @@ class Settings(BaseSettings):
     postgres_password: str
     postgres_user: str
     postgres_db: str
+    blob_sas_url: str
