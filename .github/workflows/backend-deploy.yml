@@ -30,7 +30,7 @@ jobs:
         with:
           subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION }}
           resourceGroupName: ${{ vars.AZURE_RG }}
-          template: ./.github/workflows/appservice-template.json
+          template: ./.github/workflows/backend-appservice-template.json
           parameters: acrName=${{ vars.AZURE_ACR_NAME}} appServicePlanName=${{ vars.AZURE_APP_SERVICEPLAN_NAME }} webAppName=${{ vars.AZURE_WEBAPP_NAME }} imageName=${{ vars.IMAGE_TAG }}
 
       - name: Set up Docker Buildx
