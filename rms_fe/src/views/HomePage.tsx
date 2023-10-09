@@ -1,4 +1,6 @@
 import { Card, Space } from "antd"
+
+// @ts-ignore
 import * as React from "react"
 
 export const HomePage = () => {

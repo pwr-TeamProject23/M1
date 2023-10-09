@@ -1,0 +1,23 @@
+version: "3.8"
+
+services:
+  backend:
+    image: rms:latest
+    ports:
+      - "8069:8000"
+    env_file:
+      - .env
+    volumes:
+      - "./rms:/home/app/rms"
+
+  db:
+    image: postgres:15
+    ports:
+      - "5432:5432"
+    env_file:
+      - .env
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
