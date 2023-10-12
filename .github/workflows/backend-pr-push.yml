@@ -4,9 +4,11 @@ on:
   push:
     branches:
       - "**"
+    paths:
+      - 'rms/**'
 
 jobs:
-  lint_and_test_python:
+  lint_and_test_backend:
     runs-on: ubuntu-latest
 
     steps:

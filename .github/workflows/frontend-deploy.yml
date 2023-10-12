@@ -1,6 +1,11 @@
-name: Frontend deploy
+name: Frontend deployment
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'rms_fe/**'
   workflow_dispatch:
 
 

@@ -1,6 +1,14 @@
 name: Backend deployment
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'rms/**'
+      - 'Dockerfile'
+      - 'pyproject.toml'
+      - 'poetry.lock'
   workflow_dispatch:
 
 jobs:
