@@ -1,13 +1,15 @@
 FROM python:3.11.6-bullseye as base
 
 ENV POETRY_VIRTUALENVS_CREATE=false \
-    PATH="/root/.local/bin:$PATH"
+    PATH="/root/.local/bin:$PATH" \
+    PYTHONPATH="/home/app:$PYTHONPATH"
 
 RUN curl -sSL https://install.python-poetry.org | python3 -
 
 WORKDIR /home/app
 
 COPY pyproject.toml poetry.lock ./
+COPY scripts .
 RUN poetry install
 
 COPY . .
@@ -15,8 +17,9 @@ COPY . .
 EXPOSE 8000
 
 FROM base as prod
-CMD ["uvicorn", "rms.__main__:app", "--port=8000", "--host=0.0.0.0"]
+
+CMD ["bash", "scripts/launch_prod.sh"]
 
 
 FROM base as dev
-CMD ["uvicorn", "rms.__main__:app", "--port=8000", "--host=0.0.0.0", "--reload"]
+CMD ["bash", "scripts/launch_dev.sh"]
