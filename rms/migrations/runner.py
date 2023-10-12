@@ -54,9 +54,10 @@ class FileSystemMigrationManager:
 
     @staticmethod
     def _parse_file_name(name: str) -> tuple[int, str]:
+        f_name: str
         f_name, _ = name.split(".")
 
-        migration_number, migration_name = f_name.split("_")
+        migration_number, migration_name = f_name.split("_", maxsplit=1)
 
         return int(migration_number), migration_name
 
