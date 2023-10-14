@@ -1,0 +1,14 @@
+.nav-bar-item {
+    padding: 12px 18px;
+    color: #343434;
+    border-radius: 1em;
+
+    transition: background-color ease-in-out 100ms;
+}
+
+.nav-bar-item:hover {
+    color: black;
+    background: lightgray;
+
+
+}
