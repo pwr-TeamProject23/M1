@@ -28,3 +28,10 @@ class BaseModelManager(Generic[T]):
                 return cast(T, found_models[0])
 
             return None
+
+    @classmethod
+    def create(cls, instance: T) -> T:
+        with Session(engine) as session:
+            session.add(instance)
+            session.commit()
+            return instance

@@ -1,13 +1,20 @@
-from rms.file_processing.models import StorageClient
 from azure.storage.blob.aio import BlobClient
-from rms.settings import Settings
 from fastapi import UploadFile
+from abc import ABC, abstractmethod
+from rms.settings import Settings
+
+
+class StorageClient(ABC):
+    def __init__(self):
+        self.settings = Settings()
+
+    @abstractmethod
+    async def upload(self, file: UploadFile, file_name: str) -> str:
+        """Upload a file and return its PATH."""
+        pass
 
 
 class AzureBlobClient(StorageClient):
-
-    def __init__(self):
-        self.settings = Settings()
 
     async def upload(self, file: UploadFile, file_name: str) -> str:
         blob_sas_url = f"{self.settings.blob_url}/{file_name}?{self.settings.blob_sas}"
