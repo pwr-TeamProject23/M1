@@ -93,6 +93,7 @@ class DatabaseMigrationsManager:
     def execute_migration(cls, migration: LocalMigration, print_update: bool = True):
         with engine.connect() as connection:
             connection.execute(text(migration.content))
+            connection.commit()
 
             if not cls.check_if_migration_exists(migration.id):
                 connection.execute(
@@ -100,7 +101,7 @@ class DatabaseMigrationsManager:
                     {"id": migration.id, "name": migration.description},
                 )
 
-            connection.commit()
+                connection.commit()
 
         if print_update:
             print(f"Applied migration {migration.id}_{migration.description}")
