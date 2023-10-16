@@ -1,4 +1,4 @@
-name: "Branch Push"
+name: Frontend branch push
 
 on:
   push:
