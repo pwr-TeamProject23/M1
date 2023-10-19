@@ -29,11 +29,18 @@ jobs:
           npm install
           npm run build --if-present
 
+      - name: Prepare artifact directory structure
+        working-directory: ./rms_fe
+        run: |
+          mkdir artifact_temp
+          cp -r public artifact_temp/
+          cp -r dist/* artifact_temp/
+
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v3
         with:
-          name: rms_fe
-          path: ./rms_fe/dist
+          name: rms_fe_artifact
+          path: ./rms_fe/artifact_temp
 
   deploy:
     runs-on: ubuntu-latest
@@ -64,7 +71,8 @@ jobs:
       - name: Download artifact from build job
         uses: actions/download-artifact@v3
         with:
-          name: rms_fe
+          name: rms_fe_artifact
+          path: artifacts
 
       - name: Get WebApp/FunctionApp publish profile
         id: get_publishing_profile
@@ -82,4 +90,4 @@ jobs:
           app-name: ${{ vars.AZURE_WEBAPP_NAME_FE}}
           slot-name: 'Production'
           publish-profile: ${{ steps.get_publishing_profile.outputs.profile }}
-          package: .
+          package: ./artifacts
