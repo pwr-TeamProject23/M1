@@ -40,6 +40,7 @@ class BaseModelManager(Generic[T]):
         with cls._get_session() as session:
             session.add(instance)
             session.commit()
+            session.refresh(instance)
             return instance
 
     @classmethod

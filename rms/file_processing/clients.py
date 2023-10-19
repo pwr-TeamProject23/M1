@@ -15,7 +15,6 @@ class StorageClient(ABC):
 
 
 class AzureBlobClient(StorageClient):
-
     async def upload(self, file: UploadFile, file_name: str) -> str:
         blob_sas_url = f"{self.settings.blob_url}/{file_name}?{self.settings.blob_sas}"
         blob_client = BlobClient.from_blob_url(blob_sas_url)

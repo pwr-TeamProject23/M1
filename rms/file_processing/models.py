@@ -13,4 +13,3 @@ class File(BaseModel):
 
     def __repr__(self) -> str:
         return f"File({self.name})"
-
