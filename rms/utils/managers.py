@@ -2,6 +2,8 @@ from typing import TypeVar, Generic, cast
 
 from sqlalchemy import Select
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import InvalidRequestError
+from sqlalchemy.sql.expression import ColumnElement
 
 from rms.utils.postgres import BaseModel, engine
 
@@ -39,3 +41,18 @@ class BaseModelManager(Generic[T]):
             session.add(instance)
             session.commit()
             return instance
+
+    @classmethod
+    def find_by_attribute(cls, attribute: str, value: any) -> T | None:
+        with cls._get_session() as session:
+            try:
+                column: ColumnElement = cast(ColumnElement, getattr(cls.__model__, attribute))
+                query = Select(cls.__model__).where(column == value)
+                found_models = list(session.scalars(query))
+
+                if found_models:
+                    return cast(T, found_models[0])
+
+                return None
+            except InvalidRequestError:
+                raise ValueError(f"Attribute {attribute} not found as a column in model {cls.__model__}.")
