@@ -1,4 +1,3 @@
-// @ts-ignore
 import * as React from "react"
 import { NavBar } from "./NavBar.tsx"
 import { Button, Flex, Typography } from "antd"
