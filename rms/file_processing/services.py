@@ -7,6 +7,7 @@ from rms.file_processing.models import File
 
 
 class FileUploadResult(BaseModel):
+    id: int
     status: str
     message: str
     file_path: str
@@ -27,7 +28,8 @@ async def upload_to_storage(file: UploadFile, file_name: str) -> FileUploadResul
         raise HTTPException(status_code=400, detail=f"An error occurred while saving to the database: {str(e)}")
 
     return FileUploadResult(
+        id=file_instance.id,
         status="success",
         message=f"File '{file_name}' was successfully uploaded.",
-        file_path=file_path
+        file_path=file_path,
     )

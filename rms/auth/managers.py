@@ -9,11 +9,10 @@ class UserManager(BaseModelManager[User]):
     def find_by_email(cls, email: str) -> User | None:
         return cls.find_by_attribute("email", email)
 
-      
+
 class UserCookieManager(BaseModelManager[UserCookie]):
     __model__ = UserCookie
-    
+
     @classmethod
     def find_by_value(cls, value: str) -> UserCookie | None:
         return cls.find_by_attribute("value", value)
-      
