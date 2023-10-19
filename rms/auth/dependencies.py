@@ -3,9 +3,10 @@ from datetime import datetime
 from fastapi import Request, HTTPException, status
 
 from rms.auth.managers import UserCookieManager, UserManager
+from rms.auth.models import User
 
 
-def get_current_user(request: Request):
+def get_current_user(request: Request) -> User:
     auth_cookie_value = request.cookies.get("auth_cookie")
 
     if not auth_cookie_value:

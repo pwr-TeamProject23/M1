@@ -1,9 +1,5 @@
-from sqlalchemy import Select
-from sqlalchemy.orm import Session
-
 from rms.auth.models import User, UserCookie
 from rms.utils.managers import BaseModelManager
-from rms.utils.postgres import engine
 
 
 class UserManager(BaseModelManager[User]):
