@@ -13,7 +13,7 @@ const useCreateArticle = (navigate: NavigateFunction) => {
         mutationFn: createArticle,
         onSuccess: (article) => {
             message.success("Article created successfully").then()
-            navigate(`/app/article/${article.id}`)
+            navigate(`/app/articles/${article.id}`)
         },
         onError: () => {
             message.error("Could not create the article, please try again").then()
