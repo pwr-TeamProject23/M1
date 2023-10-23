@@ -28,3 +28,12 @@ def validate_credentials(email: str, password: str) -> tuple[User, UserCookie] |
     UserCookieManager.create(auth_cookie)
 
     return user, auth_cookie
+
+
+def invalidate_cookie(auth_cookie_value: str) -> bool:
+    auth_cookie = UserCookieManager.find_by_value(auth_cookie_value)
+    if not auth_cookie:
+        return False
+
+    UserCookieManager.delete(auth_cookie)
+    return True
