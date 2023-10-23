@@ -87,7 +87,9 @@ export const ArticleDetailsPage = () => {
                 Notes to the article
             </Typography.Title>
             <EditableTextField value={article.data.notes} onSubmit={(value) => updateArticle.mutate({ notes: value })}>
-                <Typography.Paragraph style={notesStyle}> {article.data.notes}</Typography.Paragraph>
+                <Typography.Paragraph style={notesStyle}>
+                    {article.data.notes || "Notes regarding the article"}
+                </Typography.Paragraph>
             </EditableTextField>
 
             <Row style={{ marginTop: "6em" }}>
