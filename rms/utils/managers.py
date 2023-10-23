@@ -44,6 +44,12 @@ class BaseModelManager(Generic[T]):
             return instance
 
     @classmethod
+    def delete(cls, instance: T) -> None:
+        with cls._get_session() as session:
+            session.delete(instance)
+            session.commit()
+
+    @classmethod
     def find_by_attribute(cls, attribute: str, value: any) -> T | None:
         with cls._get_session() as session:
             try:
