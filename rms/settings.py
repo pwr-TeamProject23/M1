@@ -9,3 +9,5 @@ class Settings(BaseSettings):
     postgres_uri: str
     blob_url: str
     blob_sas: str
+
+    static_fernet_key: str
