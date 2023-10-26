@@ -2,15 +2,8 @@ from fastapi import UploadFile, HTTPException
 from rms.file_processing.clients import AzureBlobClient
 from rms.file_processing.managers import FileManager
 from datetime import datetime
-from pydantic import BaseModel
 from rms.file_processing.models import File
-
-
-class FileUploadResult(BaseModel):
-    id: int
-    status: str
-    message: str
-    file_path: str
+from rms.file_processing.services import FileUploadResult
 
 
 async def upload_to_storage(file: UploadFile, file_name: str) -> FileUploadResult:

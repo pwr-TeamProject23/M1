@@ -6,7 +6,7 @@ from rms.file_processing.services import FileUploadResult
 router = APIRouter()
 
 
-@router.post("/upload-file")
+@router.post("/upload")
 async def upload_file(file: UploadFile) -> FileUploadResult:
     if not file.filename.endswith(".pdf"):
         raise HTTPException(status_code=400, detail="Only PDF files are allowed.")

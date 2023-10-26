@@ -37,7 +37,7 @@ def logout(request: Request) -> Response:
 
     return response
 
-
+  
 @router.get("/me")
 def me(user: User = Depends(get_current_user)) -> UserResponse:
     response = UserResponse(
