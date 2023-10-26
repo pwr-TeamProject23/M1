@@ -1,10 +1,35 @@
-import { createBrowserRouter } from "react-router-dom"
+import { createBrowserRouter, useNavigate } from "react-router-dom"
 import { HomePage } from "./views/HomePage/HomePage.tsx"
 import LoginPage from "./views/LoginPage/LoginPage.tsx"
 import { ArticleListPage } from "./views/ArticleListPage/ArticleListPage.tsx"
 import { MainAppScaffold } from "./views/MainAppScaffold.tsx"
 import { ArticleCreationPage } from "./views/ArticleCreationPage/ArticleCreationPage.tsx"
 import { ArticleDetailsPage } from "./views/ArticleDetailsPage/ArticleDetailsPage.tsx"
+import { useAuthStore } from "./state/authState.ts"
+import { ReactNode, useEffect } from "react"
+
+type ProtectedRouteProps = {
+    children: ReactNode
+}
+
+const ProtectedRoute = (props: ProtectedRouteProps) => {
+    const { isLoggedIn, user } = useAuthStore()
+    const navigate = useNavigate()
+
+    useEffect(() => {
+        isLoggedIn().then((loggedIn) => {
+            if (!loggedIn) {
+                navigate("/login")
+            }
+        })
+    }, [])
+
+    if (!user) {
+        return <></>
+    }
+
+    return props.children
+}
 
 export const router = createBrowserRouter([
     {
@@ -17,7 +42,11 @@ export const router = createBrowserRouter([
     },
     {
         path: "/app",
-        element: <MainAppScaffold />,
+        element: (
+            <ProtectedRoute>
+                <MainAppScaffold />
+            </ProtectedRoute>
+        ),
         children: [
             {
                 path: "/app/articles",
