@@ -15,3 +15,9 @@ export type CreateArticle = Omit<Article, "id" | "created_at">
 export type ArticleUpdate = Partial<Pick<Article, "name" | "notes">>
 
 export type ArticleWithDetails = Pretty<Omit<Article, "file_id"> & { file: ApiFile }>
+
+export type ExtractedPdfFeatures = {
+    name: string
+    authors: string[]
+    keywords: string[]
+}

@@ -1,4 +1,10 @@
-import { Article, ArticleUpdate, ArticleWithDetails, CreateArticle } from "../types/api/article.ts"
+import {
+    Article,
+    ArticleUpdate,
+    ArticleWithDetails,
+    CreateArticle,
+    ExtractedPdfFeatures,
+} from "../types/api/article.ts"
 import axios from "axios"
 
 export const listArticles = async (): Promise<Article[]> => {
@@ -22,4 +28,10 @@ export const singleArticle = async (id: string | number) => {
     const response = await axios.get(`article/${id}`)
 
     return response.data as ArticleWithDetails
+}
+
+export const extractArticlePdfFeatures = async (id: string | number) => {
+    const response = await axios.post(`article/${id}/process-pdf`)
+
+    return response.data as ExtractedPdfFeatures
 }

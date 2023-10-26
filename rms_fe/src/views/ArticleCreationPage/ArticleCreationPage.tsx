@@ -55,7 +55,7 @@ const FileUpload = (props: FileUploadProps) => {
         name: "file",
         multiple: false,
         maxCount: 1,
-        action: backendUrl("upload-file"),
+        action: backendUrl("files/upload"),
 
         beforeUpload: (file) => {
             const isPdf = file.type === "application/pdf"

@@ -1,7 +1,7 @@
 import { useNavigate, useParams } from "react-router-dom"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { singleArticle, updateArticle } from "../../clients/articles.ts"
-import { Button, Col, Empty, Flex, message, Row, Space, Tag, Typography } from "antd"
+import { extractArticlePdfFeatures, singleArticle, updateArticle } from "../../clients/articles.ts"
+import { Button, Col, Empty, Flex, message, Row, Space, Spin, Tag, Typography } from "antd"
 import { EditableTextField } from "../../components/EditableTextField.tsx"
 import { ArticleUpdate } from "../../types/api/article.ts"
 import { EyeOutlined, LeftCircleOutlined } from "@ant-design/icons"
@@ -9,6 +9,7 @@ import * as React from "react"
 import { ArticlePreviewModal } from "./ArticlePreviewModal.tsx"
 import { useState } from "react"
 import { copyToClipboard } from "../../utils/copy.ts"
+import { ArticleFeatures } from "./ArticleFeatures.tsx"
 
 const useArticle = (id: string | number) => {
     return useQuery({ queryKey: ["article", id], queryFn: () => singleArticle(id) })
@@ -26,11 +27,20 @@ const useUpdateArticle = (id: string | number) => {
     })
 }
 
+const useExtractArticleFeatures = (id: string | number) => {
+    return useQuery({
+        queryKey: ["article", id, "features"],
+        queryFn: () => extractArticlePdfFeatures(id),
+        enabled: false,
+    })
+}
+
 export const ArticleDetailsPage = () => {
     const { id } = useParams()
     const navigate = useNavigate()
 
     const article = useArticle(id!)
+    const articleFeatures = useExtractArticleFeatures(id!)
     const updateArticle = useUpdateArticle(id!)
 
     const [pdfPreviewIsOpen, setPdfPreviewIsOpen] = useState(false)
@@ -67,7 +77,6 @@ export const ArticleDetailsPage = () => {
                 Created by: Jan Kowalski on {new Date(article.data.created_at).toLocaleString()}
             </Typography.Paragraph>
             <Space>
-                {/*<Typography.Text>Uploaded article: {article.data.file.name}</Typography.Text>*/}
                 <Tag
                     color="processing"
                     style={{ userSelect: "none", cursor: "pointer" }}
@@ -94,10 +103,11 @@ export const ArticleDetailsPage = () => {
 
             <Row style={{ marginTop: "6em" }}>
                 <Col span={12}>
-                    <Typography.Title level={5}>Extracted features</Typography.Title>
-                    <Empty description="Feature extraction was not yet ran">
-                        <Button type="primary">Process file</Button>
-                    </Empty>
+                    <Typography.Title level={5}>
+                        Extracted features
+                        {articleFeatures.isLoading && <Spin style={{ marginLeft: "12px" }} />}
+                    </Typography.Title>
+                    <ArticleFeatures features={articleFeatures.data} onFetch={articleFeatures.refetch} />
                 </Col>
                 <Col span={12}>
                     <Typography.Title level={5}>Proposed Reviewers</Typography.Title>
