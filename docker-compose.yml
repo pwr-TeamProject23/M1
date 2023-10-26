@@ -9,6 +9,8 @@ services:
       - .env
     volumes:
       - "./rms:/home/app/rms"
+      - "./pyproject.toml:/home/app/pyproject.toml"
+      - "./poetry.lock:/home/app/poetry.lock"
 
   db:
     image: postgres:15
