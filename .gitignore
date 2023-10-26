@@ -3,5 +3,6 @@
 */node_modules/
 rms_fe/dist/
 
+__pycache__/
 
 .env

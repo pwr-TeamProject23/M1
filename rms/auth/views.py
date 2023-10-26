@@ -1,8 +1,10 @@
-from fastapi import APIRouter, Request, Response, HTTPException, status
+from fastapi import APIRouter, Request, Response, HTTPException, status, Depends
 
 import json
 
-from rms.auth.services import LoginRequest, validate_credentials, invalidate_cookie
+from rms.auth.dependencies import get_current_user
+from rms.auth.models import User
+from rms.auth.services import LoginRequest, UserResponse, validate_credentials, invalidate_cookie
 
 router = APIRouter()
 
@@ -33,4 +35,15 @@ def logout(request: Request) -> Response:
     response = Response(content=json.dumps({"status": "Logged out successfully"}), media_type="application/json")
     response.delete_cookie(key="auth_cookie")
 
+    return response
+
+  
+@router.get("/me")
+def me(user: User = Depends(get_current_user)) -> UserResponse:
+    response = UserResponse(
+        id=user.id,
+        email=user.email,
+        first_name=user.first_name,
+        last_name=user.last_name,
+    )
     return response

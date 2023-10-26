@@ -13,6 +13,13 @@ class LoginRequest(BaseModel):
     password: str
 
 
+class UserResponse(BaseModel):
+    id: int
+    email: str
+    first_name: str
+    last_name: str
+
+
 def validate_credentials(email: str, password: str) -> tuple[User, UserCookie] | None:
     user = UserManager.find_by_email(email)
 

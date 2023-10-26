@@ -1,72 +1,78 @@
-// @ts-ignore
-import * as React from "react"
-import "./LoginPage.css"
 import { useState } from "react"
-import { Form, Input, Button, Row, Col, Typography } from "antd"
+import { Form, Input, Button, Typography, message, Flex } from "antd"
 import { UserOutlined, LockOutlined } from "@ant-design/icons"
+import { NavigateFunction, useNavigate } from "react-router-dom"
+import { useMutation } from "@tanstack/react-query"
+import { login } from "../../clients/auth.ts"
+import { LoginCredentials } from "../../types/api/auth.ts"
+import axios from "axios"
 
-type FieldType = {
-    email?: string
-    password?: string
+const useLogin = (navigate: NavigateFunction) => {
+    return useMutation({
+        mutationFn: login,
+        onSuccess: () => {
+            message.success("Successfully logged in.")
+            navigate("/app/articles")
+        },
+        onError: (error) => {
+            if (axios.isAxiosError(error)) {
+                if (error.response?.status === 400) {
+                    message.error("Invalid email and/or password.")
+                } else {
+                    message.error("Could not log in, please try again.")
+                }
+            } else {
+                message.error("Could not log in, please try again.")
+            }
+        },
+    })
 }
-
-const { Title } = Typography
 
 const LoginPage = () => {
     const [form] = Form.useForm()
     const [emailBlurred, setEmailBlurred] = useState(false)
+    const navigate = useNavigate()
 
-    const onFinish = (values: FieldType) => {
-        console.log("Success: ", values)
-        form.resetFields()
-    }
-
-    const onFinishFailed = (errorInfo: any) => {
-        console.log("Failed: ", errorInfo)
-    }
+    const loginMutation = useLogin(navigate)
 
     return (
-        <Row justify="center" align="middle" className="login-container">
-            <Col xs={18} sm={16} md={12} lg={8} xl={6} xxl={4}>
-                <Title level={4} className="login-title">
-                    Reviewer Matching System
-                </Title>
-                <Form
-                    name="login-form"
-                    form={form}
-                    onFinish={onFinish}
-                    onFinishFailed={onFinishFailed}
-                    labelCol={{ span: 24 }}
-                    autoComplete="off"
+        <Flex vertical align="center" justify="center" style={{ height: "100vh" }}>
+            <Typography.Title level={4}>Reviewer Matching System</Typography.Title>
+            <Form
+                name="login-form"
+                form={form}
+                onFinish={(data: LoginCredentials) => loginMutation.mutate(data)}
+                autoComplete="off"
+                labelCol={{ span: 24 }}
+                style={{ maxWidth: "400px", width: "80%" }}
+            >
+                <Form.Item<LoginCredentials>
+                    label="Email"
+                    name="email"
+                    rules={[
+                        { required: true, message: "Please enter your e-mail." },
+                        { type: "email", message: "This is not a valid e-mail." },
+                    ]}
+                    validateTrigger={emailBlurred ? ["onChange", "onBlur"] : ["onBlur"]}
                 >
-                    <Form.Item<FieldType>
-                        label="Email"
-                        name="email"
-                        rules={[
-                            { required: true, message: "Please enter your e-mail." },
-                            { type: "email", message: "This is not a valid e-mail." },
-                        ]}
-                        validateTrigger={emailBlurred ? ["onChange", "onBlur"] : ["onBlur"]}
-                    >
-                        <Input prefix={<UserOutlined />} placeholder="Email" onBlur={() => setEmailBlurred(true)} />
-                    </Form.Item>
+                    <Input prefix={<UserOutlined />} placeholder="Email" onBlur={() => setEmailBlurred(true)} />
+                </Form.Item>
 
-                    <Form.Item<FieldType>
-                        label="Password"
-                        name="password"
-                        rules={[{ required: true, message: "Please enter your password." }]}
-                    >
-                        <Input.Password prefix={<LockOutlined />} placeholder="Password" />
-                    </Form.Item>
+                <Form.Item<LoginCredentials>
+                    label="Password"
+                    name="password"
+                    rules={[{ required: true, message: "Please enter your password." }]}
+                >
+                    <Input.Password prefix={<LockOutlined />} placeholder="Password" />
+                </Form.Item>
 
-                    <Form.Item>
-                        <Button type="primary" htmlType="submit" block>
-                            Log in
-                        </Button>
-                    </Form.Item>
-                </Form>
-            </Col>
-        </Row>
+                <Form.Item>
+                    <Button type="primary" htmlType="submit" loading={loginMutation.isPending} block>
+                        Log in
+                    </Button>
+                </Form.Item>
+            </Form>
+        </Flex>
     )
 }
 
