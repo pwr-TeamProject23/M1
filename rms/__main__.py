@@ -19,7 +19,7 @@ app.add_middleware(
     expose_headers=["*"],
 )
 
-app.include_router(file_processing_router)
+app.include_router(file_processing_router, prefix="/files")
 app.include_router(auth_router)
 app.include_router(articles_router, prefix="/article")
 
