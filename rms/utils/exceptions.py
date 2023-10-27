@@ -25,3 +25,8 @@ class BaseHttpException(HTTPException):
 class NotFound(BaseHttpException):
     status_code = 404
     detail = "Not Found"
+
+
+class Unauthorized(BaseHttpException):
+    status_code = 403
+    detail = "Unauthorized"

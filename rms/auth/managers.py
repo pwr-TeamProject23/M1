@@ -31,6 +31,7 @@ class UserManager(BaseModelManager[User]):
     def create_user(
         cls,
         db: Session,
+        *,
         email: str,
         password: str,
         first_name: str,
