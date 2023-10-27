@@ -14,6 +14,7 @@ from rms.articles.services import (
 )
 from rms.file_processing.managers import FileManager
 from rms.file_processing.services import PdfArticleData, download_and_process_file
+from rms.utils.exceptions import NotFound
 from rms.utils.postgres import get_db
 
 router = APIRouter()
@@ -32,6 +33,9 @@ def create_article_view(article: CreateArticleData, db: Session = Depends(get_db
 @router.get("/{article_id}")
 def get_article_details_view(article_id: int, db: Session = Depends(get_db)) -> ArticleWithDetails:
     article = get_article_details(db, article_id)
+
+    if article is None:
+        raise NotFound
 
     return article
 
