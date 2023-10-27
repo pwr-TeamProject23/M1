@@ -1,10 +1,10 @@
 import { create } from "zustand"
-import { User } from "../types/api/auth"
+import { AuthUser } from "../types/api/auth"
 import { getCurrentUser } from "../clients/auth"
 
 type AuthStore = {
-    user: User | null
-    setUser: (user: User | null) => void
+    user: AuthUser | null
+    setUser: (user: AuthUser | null) => void
     isLoggedIn: () => Promise<boolean>
 }
 

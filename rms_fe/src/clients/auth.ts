@@ -1,4 +1,4 @@
-import { LoginCredentials, User } from "../types/api/auth"
+import { LoginCredentials, AuthUser } from "../types/api/auth"
 import axios from "axios"
 
 export const login = async (data: LoginCredentials) => {
@@ -16,5 +16,5 @@ export const logout = async () => {
 export const getCurrentUser = async () => {
     const response = await axios.get("me")
 
-    return response.data as User
+    return response.data as AuthUser
 }
