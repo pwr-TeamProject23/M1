@@ -1,19 +1,23 @@
 from pathlib import Path
 
+from sqlalchemy import Engine
+
 from rms.migrations.models import LocalMigration
-from rms.utils.postgres import engine
+
+#
 from sqlalchemy.sql import text
 
 
 class MigrationRunner:
     @classmethod
-    def run(cls):
+    def run(cls, engine: Engine):
         migration_files = FileSystemMigrationManager.list_all_files()
         migrations = FileSystemMigrationManager.load_all_files(migration_files)
+        migrations = sorted(migrations, key=lambda x: x.id)
 
         cls.print_detected_migrations(migrations)
 
-        DatabaseMigrationsManager.run(migrations)
+        DatabaseMigrationsManager.run(engine, migrations)
 
     @staticmethod
     def print_detected_migrations(migrations: list[LocalMigration]):
@@ -35,7 +39,7 @@ class FileSystemMigrationManager:
         return files
 
     @classmethod
-    def load_all_files(cls, paths: list[Path]):
+    def load_all_files(cls, paths: list[Path]) -> list[LocalMigration]:
         loaded_files = []
 
         for path in paths:
@@ -72,30 +76,30 @@ class DatabaseMigrationsManager:
     """
 
     @classmethod
-    def run(cls, migrations: list[LocalMigration]):
+    def run(cls, engine: Engine, migrations: list[LocalMigration]):
         print("Running migration resolver")
-        cls.execute_migration(migrations[0], print_update=False)
+        cls.execute_migration(engine, migrations[0], print_update=False)
 
         for migration in migrations:
-            should_run = not cls.check_if_migration_exists(migration.id)
+            should_run = not cls.check_if_migration_exists(engine, migration.id)
 
             if should_run:
-                cls.execute_migration(migration)
+                cls.execute_migration(engine, migration)
 
     @classmethod
-    def check_if_migration_exists(cls, migration_id: int) -> bool:
+    def check_if_migration_exists(cls, engine: Engine, migration_id: int) -> bool:
         with engine.connect() as connection:
             output = connection.execute(text(cls.GET_MIGRATION_BY_ID_QUERY), {"id": migration_id}).fetchall()
 
             return bool(output)
 
     @classmethod
-    def execute_migration(cls, migration: LocalMigration, print_update: bool = True):
+    def execute_migration(cls, engine: Engine, migration: LocalMigration, print_update: bool = True):
         with engine.connect() as connection:
             connection.execute(text(migration.content))
             connection.commit()
 
-            if not cls.check_if_migration_exists(migration.id):
+            if not cls.check_if_migration_exists(engine, migration.id):
                 connection.execute(
                     text(cls.INSERT_MIGRATION_META_QUERY),
                     {"id": migration.id, "name": migration.description},
@@ -108,4 +112,10 @@ class DatabaseMigrationsManager:
 
 
 if __name__ == "__main__":
-    MigrationRunner.run()
+
+    def main():
+        from rms.utils.postgres import engine
+
+        MigrationRunner.run(engine)
+
+    main()
