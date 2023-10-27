@@ -1,4 +1,5 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
+from sqlalchemy.orm import Session
 
 from rms.articles.managers import ArticleManager
 from rms.articles.services import (
@@ -13,30 +14,35 @@ from rms.articles.services import (
 )
 from rms.file_processing.managers import FileManager
 from rms.file_processing.services import PdfArticleData, download_and_process_file
+from rms.utils.postgres import get_db
 
 router = APIRouter()
 
 
 @router.get("/")
-def list_articles_view() -> list[Article]:
-    return list_articles()
+def list_articles_view(db: Session = Depends(get_db)) -> list[Article]:
+    return list_articles(db)
 
 
 @router.post("/")
-def create_article_view(article: CreateArticleData) -> Article:
-    return create_article(article)
+def create_article_view(article: CreateArticleData, db: Session = Depends(get_db)) -> Article:
+    return create_article(db, article)
 
 
 @router.get("/{article_id}")
-def get_article_details_view(article_id: int) -> ArticleWithDetails:
-    article = get_article_details(article_id)
+def get_article_details_view(article_id: int, db: Session = Depends(get_db)) -> ArticleWithDetails:
+    article = get_article_details(db, article_id)
 
     return article
 
 
 @router.patch("/{article_id}")
-def partial_update_article_view(article_id: int, article: ArticlePartialUpdate) -> Article:
-    article = partial_update_article(article_id, article)
+def partial_update_article_view(
+    article_id: int,
+    article: ArticlePartialUpdate,
+    db: Session = Depends(get_db),
+) -> Article:
+    article = partial_update_article(db, article_id, article)
 
     if article is None:
         raise HTTPException(status_code=404)
@@ -45,13 +51,13 @@ def partial_update_article_view(article_id: int, article: ArticlePartialUpdate) 
 
 
 @router.post("/{article_id}/process-pdf")
-async def process_article_pdf_view(article_id: int) -> PdfArticleData:
-    article = ArticleManager.find_by_id(article_id)
+async def process_article_pdf_view(article_id: int, db: Session = Depends(get_db)) -> PdfArticleData:
+    article = ArticleManager.find_by_id(db, article_id)
 
     if article is None:
         raise HTTPException(status_code=404)
 
-    article_file = FileManager.find_by_id(article.file_id)
+    article_file = FileManager.find_by_id(db, article.file_id)
 
     if article is None:
         raise HTTPException(status_code=404)

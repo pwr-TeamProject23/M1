@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import ClassVar, Optional
 
 from pydantic import BaseModel, ConfigDict
+from sqlalchemy.orm import Session
 
 from rms.articles.managers import ArticleManager
 from rms.articles.models import ArticleOrm
@@ -47,20 +48,20 @@ class ArticlePartialUpdate(BaseModel):
     notes: Optional[str] = None
 
 
-def create_article(data: CreateArticleData) -> ArticleOrm:
+def create_article(db: Session, data: CreateArticleData) -> ArticleOrm:
     article = ArticleOrm(
         name=data.name,
         notes=data.notes,
         file_id=data.file_id,
         created_at=datetime.now(),
     )
-    article = ArticleManager.create(article)
+    article = ArticleManager.create(db, article)
 
     return article
 
 
-def partial_update_article(article_id: int, data: ArticlePartialUpdate) -> ArticleOrm | None:
-    article = ArticleManager.find_by_id(article_id)
+def partial_update_article(db: Session, article_id: int, data: ArticlePartialUpdate) -> ArticleOrm | None:
+    article = ArticleManager.find_by_id(db, article_id)
 
     if not article:
         return article
@@ -71,20 +72,20 @@ def partial_update_article(article_id: int, data: ArticlePartialUpdate) -> Artic
 
         setattr(article, key, value)
 
-    return ArticleManager.create(article)
+    return ArticleManager.create(db, article)
 
 
-def list_articles() -> list[ArticleOrm]:
-    return ArticleManager.all()
+def list_articles(db: Session) -> list[ArticleOrm]:
+    return ArticleManager.all(db)
 
 
-def get_article_details(article_id: int) -> ArticleWithDetails | None:
-    article = ArticleManager.find_by_id(article_id)
+def get_article_details(db: Session, article_id: int) -> ArticleWithDetails | None:
+    article = ArticleManager.find_by_id(db, article_id)
 
     if not article:
         return None
 
-    file = FileManager.find_by_id(article.file_id)
+    file = FileManager.find_by_id(db, article.file_id)
 
     if not file:
         return None

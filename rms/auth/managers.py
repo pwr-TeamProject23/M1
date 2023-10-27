@@ -2,10 +2,10 @@ from datetime import datetime
 
 import bcrypt
 from sqlalchemy import text, bindparam
+from sqlalchemy.orm import Session
 
 from rms.auth.models import User, UserCookie, Group, Permission
 from rms.utils.managers import BaseModelManager
-from rms.utils.postgres import engine
 
 
 class UserManager(BaseModelManager[User]):
@@ -24,11 +24,18 @@ class UserManager(BaseModelManager[User]):
     """
 
     @classmethod
-    def find_by_email(cls, email: str) -> User | None:
-        return cls.find_by_attribute("email", email)
+    def find_by_email(cls, db: Session, email: str) -> User | None:
+        return cls.find_by_attribute(db, "email", email)
 
     @classmethod
-    def create_user(cls, email: str, password: str, first_name: str, last_name: str) -> User:
+    def create_user(
+        cls,
+        db: Session,
+        email: str,
+        password: str,
+        first_name: str,
+        last_name: str,
+    ) -> User:
         hashed_password = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
         user = User(
             email=email,
@@ -37,42 +44,41 @@ class UserManager(BaseModelManager[User]):
             last_name=last_name,
             created_at=datetime.now(),
         )
-        return cls.create(user)
+
+        return cls.create(db, user)
 
     @classmethod
-    def find_user_with_permissions(cls, user_id: int) -> tuple[User, list[Group], list[Permission]] | None:
-        user = cls.find_by_id(user_id)
+    def find_user_with_permissions(cls, db: Session, user_id: int) -> tuple[User, list[Group], list[Permission]] | None:
+        user = cls.find_by_id(db, user_id)
 
         if user is None:
             return None
 
-        groups = cls.find_user_groups(user_id)
+        groups = cls.find_user_groups(db, user_id)
         group_ids = [group.id for group in groups]
-        permissions = cls.find_user_permissions(user_id, group_ids)
+        permissions = cls.find_user_permissions(db, user_id, group_ids)
 
         return user, groups, permissions
 
     @classmethod
-    def find_user_groups(cls, user_id: int) -> list[Group]:
-        with engine.connect() as connection:
-            results = connection.execute(text(cls.USER_GROUPS_QUERY), {"id": user_id})
+    def find_user_groups(cls, db: Session, user_id: int) -> list[Group]:
+        results = db.execute(text(cls.USER_GROUPS_QUERY), {"id": user_id})
 
-            return [Group(id=result[0], name=result[1]) for result in results.fetchall()]
+        return [Group(id=result[0], name=result[1]) for result in results.fetchall()]
 
     @classmethod
-    def find_user_permissions(cls, user_id: int, group_ids: list[id]) -> list[Permission]:
-        with engine.connect() as connection:
-            q = text(cls.USER_PERMISSIONS_QUERY)
-            q.bindparams(bindparam("group_ids", expanding=True))
+    def find_user_permissions(cls, db: Session, user_id: int, group_ids: list[id]) -> list[Permission]:
+        q = text(cls.USER_PERMISSIONS_QUERY)
+        q.bindparams(bindparam("group_ids", expanding=True))
 
-            results = connection.execute(q, {"user_id": user_id, "group_ids": group_ids})
+        results = db.execute(q, {"user_id": user_id, "group_ids": group_ids})
 
-            return [Permission(id=result[0], code=result[1], readable_code=result[2]) for result in results.fetchall()]
+        return [Permission(id=result[0], code=result[1], readable_code=result[2]) for result in results.fetchall()]
 
 
 class UserCookieManager(BaseModelManager[UserCookie]):
     __model__ = UserCookie
 
     @classmethod
-    def find_by_value(cls, value: str) -> UserCookie | None:
-        return cls.find_by_attribute("value", value)
+    def find_by_value(cls, db: Session, value: str) -> UserCookie | None:
+        return cls.find_by_attribute(db, "value", value)
