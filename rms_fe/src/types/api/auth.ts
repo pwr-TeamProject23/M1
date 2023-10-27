@@ -3,7 +3,7 @@ export type LoginCredentials = {
     email: string
 }
 
-export type User = {
+export type AuthUser = {
     id: number
     email: string
     firstName: string

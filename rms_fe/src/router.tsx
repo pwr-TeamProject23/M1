@@ -7,6 +7,7 @@ import { ArticleCreationPage } from "./views/ArticleCreationPage/ArticleCreation
 import { ArticleDetailsPage } from "./views/ArticleDetailsPage/ArticleDetailsPage.tsx"
 import { useAuthStore } from "./state/authState.ts"
 import { ReactNode, useEffect } from "react"
+import { UsersListPage } from "./views/Admin/Users/UsersListPage.tsx"
 
 type ProtectedRouteProps = {
     children: ReactNode
@@ -48,6 +49,11 @@ export const router = createBrowserRouter([
             </ProtectedRoute>
         ),
         children: [
+            {
+                path: "/app/admin/users",
+                element: <UsersListPage />,
+            },
+            // Non admin pages
             {
                 path: "/app/articles",
                 element: <ArticleListPage />,

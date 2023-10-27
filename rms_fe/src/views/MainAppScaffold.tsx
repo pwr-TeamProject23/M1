@@ -60,11 +60,16 @@ const NavBarDropdown = () => {
             disabled: true,
         },
         {
+            key: "1",
+            label: "User Admin",
+            onClick: () => navigate("/app/admin/users"),
+        },
+        {
             type: "divider",
         },
         {
             label: "Log Out",
-            key: "1",
+            key: "2",
             danger: true,
             onClick: () => logoutMutation.mutate(),
         },
