@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict
+from sqlalchemy.orm import Session
 
 from rms.auth.managers import UserManager
 
@@ -16,5 +17,5 @@ class User(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-def list_all_users():
-    return [User.model_validate(user) for user in UserManager.all()]
+def list_all_users(db: Session):
+    return [User.model_validate(user) for user in UserManager.all(db)]
