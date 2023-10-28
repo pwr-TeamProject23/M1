@@ -1,0 +1,45 @@
+version: "3.8"
+
+
+services:
+  proxy:
+    build:
+      context: .
+      dockerfile: nginx.Dockerfile
+    ports:
+      - "8023:8023"
+    networks:
+      rms-prod-network:
+
+  backend:
+    image: rms:latest-prod
+    restart: always
+    env_file:
+      - .env
+    networks:
+      rms-prod-network:
+
+  frontend:
+    build:
+      context: rms_fe
+      dockerfile: Dockerfile
+    networks:
+      rms-prod-network:
+
+  db:
+    image: postgres:15
+    ports:
+      - "5432:5432"
+    env_file:
+      - .env
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      rms-prod-network:
+
+
+volumes:
+  pgdata:
+
+networks:
+  rms-prod-network:
