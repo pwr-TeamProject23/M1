@@ -5,13 +5,13 @@ from typing import BinaryIO
 from pypdf import PdfReader
 
 from rms.file_processing.clients import AzureBlobClient
-from rms.file_processing.models import File
+from rms.file_processing.models import FileOrm
 from rms.file_processing.services.models import PdfArticleData, FirstPagePdfData
 from rms.file_processing.services.utils import on_error
 from rms.utils.list import find_index_containing
 
 
-async def download_and_process_file(file: File) -> PdfArticleData:
+async def download_and_process_file(file: FileOrm) -> PdfArticleData:
     client = AzureBlobClient()
     pdf_data = await client.download(file.path)
 

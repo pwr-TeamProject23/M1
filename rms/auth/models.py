@@ -28,7 +28,7 @@ user_permission_m2m_table = Table(
 )
 
 
-class User(BaseModel):
+class UserOrm(BaseModel):
     __tablename__ = "user"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -39,8 +39,10 @@ class User(BaseModel):
 
     password: Mapped[str]
 
-    groups: Mapped[list["Group"]] = relationship(secondary=user_group_m2m_table, back_populates="users")
-    permissions: Mapped[list["Permission"]] = relationship(secondary=user_permission_m2m_table, back_populates="users")
+    groups: Mapped[list["GroupOrm"]] = relationship(secondary=user_group_m2m_table, back_populates="users")
+    permissions: Mapped[list["PermissionOrm"]] = relationship(
+        secondary=user_permission_m2m_table, back_populates="users"
+    )
 
     created_at: Mapped[datetime]
     last_login: Mapped[datetime]
@@ -49,7 +51,7 @@ class User(BaseModel):
         return f"User({self.first_name} {self.last_name})"
 
 
-class UserCookie(BaseModel):
+class UserCookieOrm(BaseModel):
     __tablename__ = "user_cookie"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -60,7 +62,7 @@ class UserCookie(BaseModel):
     valid_until: Mapped[datetime]
 
 
-class Permission(BaseModel):
+class PermissionOrm(BaseModel):
     __tablename__ = "permission"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -68,15 +70,17 @@ class Permission(BaseModel):
     code: Mapped[str]
     readable_code: Mapped[str]
 
-    groups: Mapped[list["Group"]] = relationship(secondary=group_permission_m2m_table, back_populates="permissions")
-    users: Mapped[list["User"]] = relationship(secondary=user_permission_m2m_table, back_populates="permissions")
+    groups: Mapped[list["GroupOrm"]] = relationship(secondary=group_permission_m2m_table, back_populates="permissions")
+    users: Mapped[list["UserOrm"]] = relationship(secondary=user_permission_m2m_table, back_populates="permissions")
 
 
-class Group(BaseModel):
+class GroupOrm(BaseModel):
     __tablename__ = "group"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str]
 
-    users: Mapped[list[User]] = relationship(secondary=user_group_m2m_table, back_populates="groups")
-    permissions: Mapped[list[Permission]] = relationship(secondary=group_permission_m2m_table, back_populates="groups")
+    users: Mapped[list[UserOrm]] = relationship(secondary=user_group_m2m_table, back_populates="groups")
+    permissions: Mapped[list[PermissionOrm]] = relationship(
+        secondary=group_permission_m2m_table, back_populates="groups"
+    )

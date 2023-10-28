@@ -5,12 +5,12 @@ import pytest
 from rms.articles.managers import ArticleManager
 from rms.articles.models import ArticleOrm
 from rms.file_processing.managers import FileManager
-from rms.file_processing.models import File
+from rms.file_processing.models import FileOrm
 
 
 @pytest.fixture
-def single_article(db) -> tuple[ArticleOrm, File]:
-    f = File(name="x", path="x", uploaded_at=datetime.now())
+def single_article(db) -> tuple[ArticleOrm, FileOrm]:
+    f = FileOrm(name="x", path="x", uploaded_at=datetime.now())
     f = FileManager.create(db, f)
 
     a = ArticleOrm(name="john", notes="", file_id=f.id, created_at=datetime.now())
@@ -20,7 +20,7 @@ def single_article(db) -> tuple[ArticleOrm, File]:
 
 
 def test_article_list_view(client, db):
-    f = File(name="x", path="x", uploaded_at=datetime.now())
+    f = FileOrm(name="x", path="x", uploaded_at=datetime.now())
     f = FileManager.create(db, f)
 
     for _ in range(3):
@@ -62,7 +62,7 @@ def test_get_articles_detail_view__not_found_object(client):
 
 
 def test_post_article(client, db):
-    f = File(name="x", path="x", uploaded_at=datetime.now())
+    f = FileOrm(name="x", path="x", uploaded_at=datetime.now())
     f = FileManager.create(db, f)
 
     payload = {"name": "Johny", "notes": "some notes", "file_id": f.id}

@@ -3,7 +3,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 from rms.utils.postgres import BaseModel
 
 
-class File(BaseModel):
+class FileOrm(BaseModel):
     __tablename__ = "file"
 
     id: Mapped[int] = mapped_column(primary_key=True)
