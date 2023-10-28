@@ -5,5 +5,11 @@ tasks:
   build:
     cmd: docker build . -t rms:latest --target dev
 
+  build-prod:
+    cmd: docker build . -t rms:latest-prod --target prod
+
   up:
     cmd: docker compose up -d
+
+  up-prod:
+    cmd: docker compose -f docker-compose.production.yml up -d
