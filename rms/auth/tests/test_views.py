@@ -1,11 +1,11 @@
 import pytest
 
 from rms.auth.managers import UserManager
-from rms.auth.models import User
+from rms.auth.models import UserOrm
 
 
 @pytest.fixture
-def test_user(db) -> User:
+def test_user(db) -> UserOrm:
     return UserManager.create_user(
         db,
         first_name="John",

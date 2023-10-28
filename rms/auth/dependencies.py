@@ -4,11 +4,11 @@ from fastapi import Request, HTTPException, status, Depends
 from sqlalchemy.orm import Session
 
 from rms.auth.managers import UserCookieManager, UserManager
-from rms.auth.models import User
+from rms.auth.models import UserOrm
 from rms.utils.postgres import get_db
 
 
-def get_current_user(request: Request, db: Session = Depends(get_db)) -> User:
+def get_current_user(request: Request, db: Session = Depends(get_db)) -> UserOrm:
     auth_cookie_value = request.cookies.get("auth_cookie")
 
     if not auth_cookie_value:
@@ -20,5 +20,6 @@ def get_current_user(request: Request, db: Session = Depends(get_db)) -> User:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized")
 
     user = UserManager.find_by_id(db, user_cookie.user_id)
+    # TODO: Set users last login here
 
     return user

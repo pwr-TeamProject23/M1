@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from starlette.responses import JSONResponse
 
 from rms.auth.dependencies import get_current_user
-from rms.auth.models import User
+from rms.auth.models import UserOrm
 from rms.auth.services import LoginRequest, UserResponse, validate_credentials, invalidate_cookie
 from rms.utils.exceptions import Unauthorized
 from rms.utils.postgres import get_db
@@ -42,7 +42,7 @@ def logout(request: Request, db: Session = Depends(get_db)) -> Response:
 
 
 @router.get("/me")
-def me(user: User = Depends(get_current_user)) -> UserResponse:
+def me(user: UserOrm = Depends(get_current_user)) -> UserResponse:
     response = UserResponse(
         id=user.id,
         email=user.email,
