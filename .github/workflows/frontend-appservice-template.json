@@ -41,7 +41,7 @@
           "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('appServicePlanName'))]",
           "siteConfig": {
             "linuxFxVersion": "NODE|18-lts",
-            "appCommandLine": "pm2 serve /home/site/wwwroot --no-daemon"
+            "appCommandLine": "pm2 serve /home/site/wwwroot --no-daemon --spa"
           }
         }
       }
