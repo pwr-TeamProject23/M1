@@ -1,6 +1,7 @@
 import { User } from "../../../types/api/user.ts"
-import { Table } from "antd"
-import { ColumnsType } from "antd/es/table"
+import { Button, Row, Table } from "antd"
+import { ColumnsType, ColumnType } from "antd/es/table"
+import { useNavigate } from "react-router-dom"
 
 export type UsersTableProps = {
     users: User[]
@@ -57,5 +58,19 @@ const tableColumns: ColumnsType<User> = [
 ]
 
 export const UsersTable = (props: UsersTableProps) => {
-    return <Table dataSource={props.users} loading={props.isLoading} columns={tableColumns} rowKey="id" />
+    const navigate = useNavigate()
+
+    const actionsColumn: ColumnType<User> = {
+        title: "Actions",
+        key: "actions",
+        align: "end",
+        render: (_, user) => (
+            <Row>
+                <Button onClick={() => navigate(`/app/admin/users/${user.id}`)}> View </Button>
+            </Row>
+        ),
+    }
+
+    const columns = [...tableColumns, actionsColumn]
+    return <Table dataSource={props.users} loading={props.isLoading} columns={columns} rowKey="id" />
 }

@@ -54,7 +54,7 @@ export const ArticlesTable = (props: ArticlesTableProps) => {
 
     const actionsColumn: ColumnType<Article> = {
         title: "Actions",
-        key: "id",
+        key: "actions",
         align: "end",
         render: (_, row) => (
             <Row align="middle">
@@ -64,5 +64,5 @@ export const ArticlesTable = (props: ArticlesTableProps) => {
     }
 
     const columns = [...tableColumns, actionsColumn]
-    return <Table dataSource={props.data} columns={columns} loading={props.isLoading} />
+    return <Table dataSource={props.data} columns={columns} loading={props.isLoading} rowKey="id" />
 }
