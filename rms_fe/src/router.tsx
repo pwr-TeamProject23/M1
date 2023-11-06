@@ -8,6 +8,7 @@ import { ArticleDetailsPage } from "./views/ArticleDetailsPage/ArticleDetailsPag
 import { useAuthStore } from "./state/authState.ts"
 import { ReactNode, useEffect } from "react"
 import { UsersListPage } from "./views/Admin/Users/UsersListPage.tsx"
+import { UsersDetailPage } from "./views/Admin/Users/UsersDetailPage.tsx"
 
 type ProtectedRouteProps = {
     children: ReactNode
@@ -50,21 +51,39 @@ export const router = createBrowserRouter([
         ),
         children: [
             {
-                path: "/app/admin/users",
-                element: <UsersListPage />,
+                path: "admin",
+                children: [
+                    {
+                        path: "users",
+                        children: [
+                            {
+                                path: "",
+                                element: <UsersListPage />,
+                            },
+                            {
+                                path: ":id",
+                                element: <UsersDetailPage />,
+                            },
+                        ],
+                    },
+                ],
             },
-            // Non admin pages
             {
-                path: "/app/articles",
-                element: <ArticleListPage />,
-            },
-            {
-                path: "/app/articles/create",
-                element: <ArticleCreationPage />,
-            },
-            {
-                path: "/app/articles/:id",
-                element: <ArticleDetailsPage />,
+                path: "articles",
+                children: [
+                    {
+                        path: "",
+                        element: <ArticleListPage />,
+                    },
+                    {
+                        path: "create",
+                        element: <ArticleCreationPage />,
+                    },
+                    {
+                        path: ":id",
+                        element: <ArticleDetailsPage />,
+                    },
+                ],
             },
         ],
     },
