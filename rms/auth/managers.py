@@ -87,3 +87,11 @@ class UserCookieManager(BaseModelManager[UserCookieOrm]):
     @classmethod
     def find_by_value(cls, db: Session, value: str) -> UserCookieOrm | None:
         return cls.find_by_attribute(db, "value", value)
+
+
+class GroupManager(BaseModelManager[GroupOrm]):
+    __model__ = GroupOrm
+
+
+class PermissionManager(BaseModelManager[PermissionOrm]):
+    __model__ = PermissionOrm
