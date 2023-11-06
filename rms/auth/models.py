@@ -84,3 +84,6 @@ class GroupOrm(BaseModel):
     permissions: Mapped[list[PermissionOrm]] = relationship(
         secondary=group_permission_m2m_table, back_populates="groups"
     )
+
+    def __repr__(self) -> str:
+        return f"Group(id: {self.id}) {self.name}"
