@@ -11,5 +11,5 @@ class Settings(BaseSettings):
     blob_sas: str
     scopus_api_key: str
     scopus_search_endpoint: str
-    dblp_search_endpoint: str
     allowed_origins: str
+    dblp_search_endpoint: str
