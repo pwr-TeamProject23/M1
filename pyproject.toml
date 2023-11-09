@@ -21,6 +21,7 @@ bcrypt = "^4.0.1"
 pypdf = "^3.16.4"
 pytest-httpx = "^0.26.0"
 pytest-asyncio = "^0.21.1"
+scholarly = "^1.7.11"
 
 
 [tool.poetry.group.dev.dependencies]

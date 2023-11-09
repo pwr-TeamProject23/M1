@@ -1,5 +1,7 @@
-from rms.search_engine.clients import ScopusArticleSearchApi
+from rms.search_engine.clients import ScopusArticleSearchApi, DblpAuthorSearchApi, ScholarAuthorSearchApi
 from rms.search_engine.models import SearchBody, ScopusSearchResponse, SearchResponse, Affiliation, Author, Article
+from rms.search_engine.models.dblp_models import DblpAuthorSearchBody, DblpAuthorResponse
+from rms.search_engine.models.scholar_models import ScholarAuthorSearchBody, ScholarAuthorResponse
 
 
 def transform_scopus_response(scopus_response: ScopusSearchResponse) -> SearchResponse:
@@ -65,3 +67,39 @@ async def search_scopus_service(body: SearchBody) -> SearchResponse:
     client = ScopusArticleSearchApi()
     scopus_response = await client.search(body)
     return transform_scopus_response(scopus_response)
+
+
+async def get_author_dblp_service(body: DblpAuthorSearchBody) -> DblpAuthorResponse | None:
+    client = DblpAuthorSearchApi()
+    response = await client.search(body)
+
+    if response.result.hits.total == 0:
+        return None
+
+    author = response.result.hits.hit[0]
+
+    return DblpAuthorResponse(
+        dblp_id=author.id,
+        dblp_url=author.info.url
+    )
+
+
+async def get_author_scholar_service(body: ScholarAuthorSearchBody) -> ScholarAuthorResponse | None:
+    client = ScholarAuthorSearchApi()
+    response = await client.search(body)
+
+    if response is None:
+        return None
+
+    return ScholarAuthorResponse(
+        scholar_id=response.scholar_id,
+        scholar_url=f"https://scholar.google.com/citations?user={response.scholar_id}",
+        url_picture=response.url_picture,
+        homepage=response.homepage,
+        cited_by=response.citedby,
+        cited_by_5y=response.citedby5y,
+        i10_index=response.i10index,
+        i10_index_5y=response.i10index5y,
+        interests=response.interests,
+        email_domain=response.email_domain
+    )
