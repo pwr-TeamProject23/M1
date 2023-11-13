@@ -1,98 +1,106 @@
-import { Form, Input, InputRef, Space, Tag } from "antd"
-import { PlusOutlined } from "@ant-design/icons"
-import * as React from "react"
-import { useEffect, useRef, useState } from "react"
-import { NoOp } from "../../utils/functions.ts"
+import React, { useState, useEffect, useRef } from 'react';
+import { Input, Space, Tag } from 'antd';
+import { PlusOutlined } from '@ant-design/icons';
+import { InputRef } from 'antd/lib/input';
 
 export type EditableTagsInputProps = {
-    name: string
-}
+    value?: string[];
+    onChange?: (newTags: string[]) => void;
+};
 
-export function EditableTagsInput(props: EditableTagsInputProps) {
-    const form = Form.useFormInstance()
-    const values = Form.useWatch(props.name, { form, preserve: true }) as string[]
-    const [openEditTag, setOpenEditTag] = useState<number | null>(null)
+export const EditableTagsInput: React.FC<EditableTagsInputProps> = ({ value = [], onChange }) => {
+    const [tags, setTags] = useState<string[]>(value);
+    const [editIndex, setEditIndex] = useState<number | null>(null);
+    const [newTagValue, setNewTagValue] = useState('');
 
-    const onCreate = (newValue: string) => {
-        form.setFieldValue(props.name, [...values, newValue])
-        setOpenEditTag(null)
-    }
+    useEffect(() => {
+        setTags(value);
+    }, [value]);
 
-    const onEdit = (index: number, newValue: string) => {
-        const valuesCopy = [...values]
+    const handleTagChange = (newTags: string[]) => {
+        setTags(newTags);
+        onChange?.(newTags);
+    };
 
-        valuesCopy[index] = newValue
-        form.setFieldValue(props.name, valuesCopy)
-        setOpenEditTag(null)
-    }
+    const handleCreate = () => {
+        if (newTagValue && !tags.includes(newTagValue)) {
+            const newTags = [...tags, newTagValue];
+            handleTagChange(newTags);
+            setNewTagValue('');
+        }
+        setEditIndex(null);
+    };
 
-    const onDelete = (index: number) => {
-        const newValues = values.filter((_, idx) => idx !== index)
+    const handleEdit = (index: number, newTag: string) => {
+        const newTags = [...tags];
+        newTags[index] = newTag;
+        handleTagChange(newTags);
+        setEditIndex(null);
+    };
 
-        form.setFieldValue(props.name, newValues)
-    }
+    const handleDelete = (index: number) => {
+        const newTags = tags.filter((_, idx) => idx !== index);
+        handleTagChange(newTags);
+    };
 
     return (
         <Space wrap>
-            {(values || []).map((value, index) => (
+            {tags.map((tag, index) => (
                 <EditableTag
-                    key={value}
-                    value={value}
-                    isEdited={index === openEditTag}
-                    onEditStart={() => setOpenEditTag(index)}
-                    onEditStop={() => setOpenEditTag(null)}
-                    onSave={(newValue) => onEdit(index, newValue)}
-                    onDelete={() => onDelete(index)}
+                    key={`${tag}-${index}`}
+                    tag={tag}
+                    isEdited={index === editIndex}
+                    onEdit={() => setEditIndex(index)}
+                    onSave={(newTag) => handleEdit(index, newTag)}
+                    onDelete={() => handleDelete(index)}
                 />
             ))}
-
-            <EditableTag
-                value="New Tag"
-                icon={<PlusOutlined />}
-                closable={false}
-                isEdited={-1 === openEditTag}
-                onEditStart={() => setOpenEditTag(-1)}
-                onEditStop={() => setOpenEditTag(null)}
-                onSave={(newValue) => onCreate(newValue)}
-                onDelete={NoOp}
-            />
+            {editIndex === -1 ? (
+                <Input
+                    type="text"
+                    size="small"
+                    value={newTagValue}
+                    onChange={(e) => setNewTagValue(e.target.value)}
+                    onPressEnter={handleCreate}
+                    onBlur={handleCreate}
+                    ref={inputRef => inputRef?.focus()}
+                />
+            ) : (
+                <Tag
+                    icon={<PlusOutlined />}
+                    onClick={() => setEditIndex(-1)}
+                >
+                    New Tag
+                </Tag>
+            )}
         </Space>
-    )
-}
-
+    );
+};
 type EditableTagProps = {
-    value: string
-    closable?: boolean
-    icon?: React.ReactNode
-    isEdited: boolean
+    tag: string;
+    isEdited: boolean;
+    icon?: React.ReactNode;
+    onEdit: () => void;
+    onSave: (newTag: string) => void;
+    onDelete: () => void;
+};
 
-    onEditStart: () => void
-    onEditStop: () => void
-    onSave: (newValue: string) => void
-    onDelete: () => void
-}
-const EditableTag = (props: EditableTagProps) => {
-    const closable = props.closable ?? true
-
-    const inputRef = useRef<InputRef>(null)
-
-    const [editValue, setEditValue] = useState(props.value)
-
-    const onClick = (isDouble: boolean) => {
-        if (isDouble || (!isDouble && props.icon)) {
-            props.onEditStart()
-        }
-    }
-
-    const onEnter = () => {
-        props.onSave(editValue)
-    }
+const EditableTag: React.FC<EditableTagProps> = ({ tag, isEdited, icon, onEdit, onSave, onDelete }) => {
+    const inputRef = useRef<InputRef>(null);
+    const [editValue, setEditValue] = useState(tag);
 
     useEffect(() => {
-        inputRef.current?.focus()
-    }, [props.isEdited])
+        if (isEdited) {
+            inputRef.current?.focus();
+        }
+    }, [isEdited]);
 
-    if (props.isEdited) {
+    const handleSave = () => {
+        onSave(editValue);
+        setEditValue('');
+    };
+
+    if (isEdited) {
         return (
             <Input
                 ref={inputRef}
@@ -100,22 +108,20 @@ const EditableTag = (props: EditableTagProps) => {
                 size="small"
                 value={editValue}
                 onChange={(e) => setEditValue(e.target.value)}
-                onPressEnter={onEnter}
-                onBlur={props.onEditStop}
+                onPressEnter={handleSave}
+                onBlur={handleSave}
             />
-        )
+        );
     }
 
     return (
         <Tag
-            key={props.value}
-            icon={props.icon}
-            closable={closable}
-            onClick={() => onClick(false)}
-            onDoubleClick={() => onClick(true)}
-            onClose={() => props.onDelete()}
+            icon={icon}
+            closable={true}
+            onClick={onEdit}
+            onClose={onDelete}
         >
-            {props.value}
+            {tag}
         </Tag>
-    )
-}
+    );
+};
