@@ -13,7 +13,7 @@ export const listArticles = async (): Promise<Article[]> => {
     return response.data as Article[]
 }
 export const createArticle = async (data: CreateArticle): Promise<Article> => {
-    const response = await axios.post("article", data)
+    const response = await axios.post("article/", data)
 
     return response.data as Article
 }

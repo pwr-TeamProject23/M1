@@ -1,7 +1,8 @@
 import { useNavigate, useParams } from "react-router-dom"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { extractArticlePdfFeatures, singleArticle, updateArticle } from "../../clients/articles.ts"
-import { Button, Col, Empty, Flex, message, Row, Space, Spin, Tag, Typography } from "antd"
+import { searchArticles } from "../../clients/search-engine.ts"
+import { Button, Flex, message, Space, Tag, Typography, Steps, Divider, FloatButton } from "antd"
 import { EditableTextField } from "../../components/EditableTextField.tsx"
 import { ArticleUpdate } from "../../types/api/article.ts"
 import { EyeOutlined, LeftCircleOutlined } from "@ant-design/icons"
@@ -10,6 +11,8 @@ import { ArticlePreviewModal } from "./ArticlePreviewModal.tsx"
 import { useState } from "react"
 import { copyToClipboard } from "../../utils/copy.ts"
 import { ArticleFeatures } from "./ArticleFeatures.tsx"
+import { SearchBody, SearchResponse } from "../../types/api/search-engine.ts"
+import { ArticleRecommendations } from "./ArticleRecommendations.tsx"
 
 const useArticle = (id: string | number) => {
     return useQuery({ queryKey: ["article", id], queryFn: () => singleArticle(id) })
@@ -35,7 +38,28 @@ const useExtractArticleFeatures = (id: string | number) => {
     })
 }
 
+const useSearchArticles = () => {
+    return useMutation<SearchResponse, Error, SearchBody>({
+        mutationFn: (searchBody: SearchBody) => {
+            return searchArticles(searchBody);
+        },
+        onSuccess: () => {
+            message.success("Recommendations generated successfully");
+        },
+        onError: (error) => {
+            message.error(error.message);
+            console.error(error);
+        },
+    });
+};
+
+enum Step {
+    ExtractFeatures = 0,
+    Recommendations = 1,
+}
+
 export const ArticleDetailsPage = () => {
+
     const { id } = useParams()
     const navigate = useNavigate()
 
@@ -44,6 +68,10 @@ export const ArticleDetailsPage = () => {
     const updateArticle = useUpdateArticle(id!)
 
     const [pdfPreviewIsOpen, setPdfPreviewIsOpen] = useState(false)
+    const [recommendations, setRecommendations] = useState<SearchResponse>();
+    const [currentStep, setCurrentStep] = useState(0);
+
+    const stepsRef = React.useRef<HTMLDivElement>(null);
 
     const notesStyle: React.CSSProperties = {
         border: "1px solid gray",
@@ -51,9 +79,47 @@ export const ArticleDetailsPage = () => {
         padding: "4px 8px",
     }
 
+    React.useEffect(() => {
+        if (currentStep === Step.Recommendations) {
+            stepsRef.current?.scrollIntoView({ behavior: "smooth" });
+        }
+    }, [currentStep]);
+
+    const searchArticles = useSearchArticles();
+
+    const handleGenerateRecommendations = (searchBody: SearchBody) => {
+        searchArticles.mutate(searchBody, {
+            onSuccess: (data) => {
+                setCurrentStep(Step.Recommendations);
+                console.log(searchArticles.data);
+                setRecommendations(data);
+            }
+        });
+    };
+    const handleStepChange = (current: number) => {
+        setCurrentStep(current);
+    };
+
     if (!article.data) {
         return <div>is loading</div>
     }
+
+    const steps = [
+        {
+            title: 'Extract Features',
+            content: (
+                <ArticleFeatures features={articleFeatures.data} onFetch={articleFeatures.refetch} isLoadingFeatures={articleFeatures.isLoading} isLoadingArticles={searchArticles.isPending} onGenerateRecommendations={handleGenerateRecommendations} />
+            )
+        },
+        {
+            title: 'Recommendations',
+            content: (
+                <div style={{ minHeight: "100vh" }}>
+                    <ArticleRecommendations recommendations={recommendations} />
+                </div>
+            ),
+        }
+    ];
 
     return (
         <div style={{ padding: "2em 4em" }}>
@@ -101,25 +167,29 @@ export const ArticleDetailsPage = () => {
                 </Typography.Paragraph>
             </EditableTextField>
 
-            <Row style={{ marginTop: "6em" }}>
-                <Col span={12}>
-                    <Typography.Title level={5}>
-                        Extracted features
-                        {articleFeatures.isLoading && <Spin style={{ marginLeft: "12px" }} />}
-                    </Typography.Title>
-                    <ArticleFeatures features={articleFeatures.data} onFetch={articleFeatures.refetch} />
-                </Col>
-                <Col span={12}>
-                    <Typography.Title level={5}>Proposed Reviewers</Typography.Title>
-                    <Empty description="There are no recommendations yet" />
-                </Col>
-            </Row>
+            <Flex vertical align="center">
+                <Flex ref={stepsRef} vertical align="center" style={{ position: "sticky", top: "0", background: "white", zIndex: "1000", width: "100%", paddingTop: "10px" }}>
+                    <Steps
+                        current={currentStep}
+                        style={{ width: "50%" }}
+                        percent={(articleFeatures.isFetched && currentStep === 0) ? 50 : 0}
+                        labelPlacement="vertical"
+                        onChange={handleStepChange}
+                        items={steps} />
+
+                    <Divider style={{ margin: "0px" }} />
+                </Flex>
+                <div style={{ width: "70vw" }} className="steps-content">{steps[currentStep].content}</div>
+            </Flex>
 
             <ArticlePreviewModal
                 isOpen={pdfPreviewIsOpen}
                 article={article.data}
                 onClose={() => setPdfPreviewIsOpen(false)}
             />
+
+            <FloatButton.BackTop />
+
         </div>
     )
 }
