@@ -37,9 +37,23 @@ services:
     networks:
       rms-prod-network:
 
+  minio:
+    image: quay.io/minio/minio
+    command: server /data --console-address ":9001"
+    env_file:
+      - .env
+    volumes:
+      - minio-data:/mnt/data
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    networks:
+      rms-prod-network:
+
 
 volumes:
   pgdata:
+  minio-data:
 
 networks:
   rms-prod-network:
