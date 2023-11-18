@@ -8,25 +8,25 @@ from rms.search_engine.models import SearchBody
             "query": '(TITLE("test"))',
             "count": 3,
             "view": "COMPLETE",
-            "sort": "-relevancy,-citedby_count,-coverDate"
+            "sort": "-relevancy,-citedby-count,-coverDate"
         }),
         (SearchBody(title="test", keywords=["key1", "key2"]), {
             "query": '(TITLE("test")) AND (KEY("key1") OR KEY("key2"))',
             "count": 3,
             "view": "COMPLETE",
-            "sort": "-relevancy,-citedby_count,-coverDate"
+            "sort": "-relevancy,-citedby-count,-coverDate"
         }),
         (SearchBody(title="test", abstract_keywords=["word1", "word2"]), {
             "query": '(TITLE("test")) AND (ABS("word1") OR ABS("word2"))',
             "count": 3,
             "view": "COMPLETE",
-            "sort": "-relevancy,-citedby_count,-coverDate"
+            "sort": "-relevancy,-citedby-count,-coverDate"
         }),
         (SearchBody(title="test", keywords=["key1", "key2"], abstract_keywords=["word1", "word2"]), {
             "query": '(TITLE("test")) AND (KEY("key1") OR KEY("key2")) AND (ABS("word1") OR ABS("word2"))',
             "count": 3,
             "view": "COMPLETE",
-            "sort": "-relevancy,-citedby_count,-coverDate"
+            "sort": "-relevancy,-citedby-count,-coverDate"
         })
 ))
 def test_scopus_client_params_builder(test_input, expected):

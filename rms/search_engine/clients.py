@@ -48,7 +48,7 @@ class ScopusArticleSearchApi(ScopusClient):
             "query": combined_criteria,
             "count": query.count,
             "view": "COMPLETE",
-            "sort": "-relevancy,-citedby_count,-coverDate"
+            "sort": "-relevancy,-citedby-count,-coverDate"
         }
 
         return params
