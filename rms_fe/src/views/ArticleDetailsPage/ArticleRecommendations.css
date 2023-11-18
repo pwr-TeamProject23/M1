@@ -1,0 +1,11 @@
+.titleText {
+    margin-bottom: 0px !important;
+}
+
+.titleText:hover {
+    text-decoration: underline;
+}
+
+.authorsList {
+    flex-wrap: wrap;
+}

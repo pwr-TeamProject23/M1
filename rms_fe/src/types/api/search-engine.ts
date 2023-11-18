@@ -22,15 +22,21 @@ export type Article = {
   title: string | undefined;
   creator: string | undefined;
   publication_name: string | undefined;
-  citedByCount: string | undefined;
-  coverDate: string | undefined;
-  scopusUrl: string | undefined;
+  cited_by_count: string | undefined;
+  cover_date: string | undefined;
+  scopus_url: string | undefined;
   scopus_citedby_url: string | undefined;
   fullTextUrl: string | undefined;
   description: string | undefined;
   affiliations: Affiliation[];
   authors: Author[];
-  sourceId: string | undefined;
+  source_id: string | undefined;
+  doi_url: string | undefined;
+  volume: string | undefined;
+  issue_id: string | undefined;
+  article_number: string | undefined;
+  keywords: string[] | undefined;
+
 };
 
 export type SearchResponse = {
