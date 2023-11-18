@@ -52,7 +52,12 @@ def transform_scopus_response(scopus_response: ScopusSearchResponse) -> SearchRe
             description=entry.dc_description,
             affiliations=affiliations,
             authors=authors,
-            source_id=entry.source_id
+            source_id=entry.source_id,
+            volume=entry.volume,
+            issue_id=entry.issue_id,
+            doi_url=f"https://doi.org/{entry.doi}" if entry.doi else None,
+            article_number=entry.article_number,
+            keywords=[keyword.strip() for keyword in (entry.authhKeywords or "").split("|") if keyword.strip()]
         )
         articles.append(article)
 

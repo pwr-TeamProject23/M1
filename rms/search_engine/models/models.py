@@ -34,6 +34,11 @@ class Article(BaseModel):
     affiliations: list[Affiliation] = []
     authors: list[Author] = []
     source_id: str | None
+    volume: str | None
+    issue_id: str | None
+    doi_url: str | None
+    article_number: str | None
+    keywords: list[str] = []
 
 
 class SearchResponse(BaseModel):
