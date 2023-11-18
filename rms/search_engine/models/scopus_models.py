@@ -43,6 +43,11 @@ class ScopusEntry(BaseModel):
     author: list[ScopusAuthor] = []
     source_id: str | None = Field(alias="source-id", default=None)
     error: str | None = Field(alias="error", default=None)
+    volume: str | None = Field(alias="prism:volume", default=None)
+    issue_id: str | None = Field(alias="prism:issueIdentifier", default=None)
+    doi: str | None = Field(alias="prism:doi", default=None)
+    article_number: str | None = Field(alias="article-number", default=None)
+    authhKeywords: str | None = Field(alias="authkeywords", default=None)
 
 
 class ScopusSearch(BaseModel):
