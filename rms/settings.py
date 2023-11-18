@@ -13,3 +13,6 @@ class Settings(BaseSettings):
     scopus_search_endpoint: str
     allowed_origins: str
     dblp_search_endpoint: str
+
+    minio_access_id: str
+    minio_secret_key: str

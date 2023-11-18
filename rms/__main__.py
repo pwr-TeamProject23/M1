@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
+from rms.file_processing.clients import MinioClient
 from rms.settings import Settings
 from rms.file_processing.views import router as file_processing_router
 from rms.auth.views import router as auth_router
@@ -8,6 +9,8 @@ from rms.articles.views import router as articles_router
 from rms.admin.views import router as admin_router
 from rms.search_engine import views as search_engine_views
 
+
+MinioClient().try_create_bucket("articles")
 
 app = FastAPI()
 settings = Settings()
