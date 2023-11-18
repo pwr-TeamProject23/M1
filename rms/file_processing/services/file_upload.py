@@ -1,7 +1,7 @@
 from fastapi import UploadFile, HTTPException
 from sqlalchemy.orm import Session
 
-from rms.file_processing.clients import AzureBlobClient
+from rms.file_processing.clients import MinioClient
 from rms.file_processing.managers import FileManager
 from datetime import datetime
 from rms.file_processing.models import FileOrm
@@ -9,7 +9,7 @@ from rms.file_processing.services import FileUploadResult
 
 
 async def upload_to_storage(db: Session, file: UploadFile, file_name: str) -> FileUploadResult:
-    blob_client = AzureBlobClient()
+    blob_client = MinioClient()
 
     try:
         file_path = await blob_client.upload(file, file_name)

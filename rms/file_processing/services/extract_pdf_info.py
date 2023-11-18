@@ -4,7 +4,7 @@ from typing import BinaryIO
 
 from pypdf import PdfReader
 
-from rms.file_processing.clients import AzureBlobClient
+from rms.file_processing.clients import MinioClient
 from rms.file_processing.models import FileOrm
 from rms.file_processing.services.models import PdfArticleData, FirstPagePdfData
 from rms.file_processing.services.utils import on_error
@@ -12,7 +12,7 @@ from rms.utils.list import find_index_containing
 
 
 async def download_and_process_file(file: FileOrm) -> PdfArticleData:
-    client = AzureBlobClient()
+    client = MinioClient()
     pdf_data = await client.download(file.path)
 
     return process_file(BytesIO(pdf_data))
