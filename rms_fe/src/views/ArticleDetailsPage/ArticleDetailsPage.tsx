@@ -43,9 +43,6 @@ const useSearchArticles = () => {
         mutationFn: (searchBody: SearchBody) => {
             return searchArticles(searchBody);
         },
-        onSuccess: () => {
-            message.success("Recommendations generated successfully");
-        },
         onError: (error) => {
             message.error(error.message);
             console.error(error);
@@ -91,7 +88,6 @@ export const ArticleDetailsPage = () => {
         searchArticles.mutate(searchBody, {
             onSuccess: (data) => {
                 setCurrentStep(Step.Recommendations);
-                console.log(searchArticles.data);
                 setRecommendations(data);
             }
         });

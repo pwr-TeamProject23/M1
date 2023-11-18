@@ -6,9 +6,7 @@
 
     // This disables the formatting rules in ESLint that Prettier is going to be responsible for handling.
     // Make sure it's always the last config, so it gets the chance to override other configs.
-    "eslint-config-prettier",
-    "plugin:@typescript-eslint/eslint-recommended",
-    "plugin:@typescript-eslint/recommended"
+    "eslint-config-prettier"
   ],
   "settings": {
     "import/parsers": {
@@ -29,7 +27,6 @@
     "@typescript-eslint/no-explicit-any": "off",
     "import/no-named-as-default": "off",
     "semi": "off",
-    "no-unused-vars": "warn",
     "no-unused-expressions": "warn",
     "no-unused-labels": "warn",
     "react/react-in-jsx-scope": "off",
