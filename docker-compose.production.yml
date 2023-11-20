@@ -7,7 +7,7 @@ services:
       context: .
       dockerfile: nginx.Dockerfile
     ports:
-      - "22301:8023"
+      - "80:8023"
     networks:
       rms-prod-network:
 
