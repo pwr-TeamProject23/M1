@@ -8,7 +8,7 @@ import {
 import axios from "axios"
 
 export const listArticles = async (): Promise<Article[]> => {
-    const response = await axios.get("article")
+    const response = await axios.get("article/")
 
     return response.data as Article[]
 }
