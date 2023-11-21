@@ -1,7 +1,7 @@
 from rms.search_engine.clients import ScopusArticleSearchApi, DblpAuthorSearchApi, ScholarAuthorSearchApi
 from rms.search_engine.models import SearchBody, ScopusSearchResponse, SearchResponse, Affiliation, Author, Article
-from rms.search_engine.models.dblp_models import DblpAuthorSearchBody, DblpAuthorResponse, DblpAuthor
-from rms.search_engine.models.scholar_models import ScholarAuthorSearchBody, ScholarAuthorResponse, ScholarAuthor
+from rms.search_engine.models.dblp_models import DblpAuthorResponse, DblpAuthor
+from rms.search_engine.models.scholar_models import ScholarAuthorResponse, ScholarAuthor
 
 
 def transform_scopus_response(scopus_response: ScopusSearchResponse) -> SearchResponse:
