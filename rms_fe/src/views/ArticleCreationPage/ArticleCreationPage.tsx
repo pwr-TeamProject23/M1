@@ -66,8 +66,6 @@ const FileUpload = (props: FileUploadProps) => {
             return isPdf || Upload.LIST_IGNORE
         },
         onChange: (info) => {
-            console.log(info.file.status)
-
             if (info.file.status === "done") {
                 const response = info.file.response as FileUploadResponse
                 props.onFileChange(response)

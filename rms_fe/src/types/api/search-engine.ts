@@ -51,3 +51,37 @@ export type SearchBody = {
   abstractKeywords: string[] | undefined;
   count: number | undefined;
 };
+
+export type DblpAuthor = {
+  dblp_id: string | undefined;
+  dblp_url: string | undefined;
+};
+
+export type DblpAuthorResponse = {
+  authors: DblpAuthor[];
+};
+
+export type DblpAuthorSearchBody = {
+  author_name: string;
+};
+
+export type ScholarAuthor = {
+  scholar_id: string | undefined;
+  scholar_url: string | undefined;
+  url_picture: string | undefined;
+  homepage: string | null;
+  cited_by: number | undefined;
+  cited_by_5y: number | undefined;
+  i10_index: number | undefined;
+  i10_index_5y: number | undefined;
+  interests: string[] | undefined;
+  email_domain: string | undefined;
+};
+
+export type ScholarAuthorResponse = {
+  authors: ScholarAuthor[];
+};
+
+export type ScholarAuthorSearchBody = {
+  author_name: string;
+};

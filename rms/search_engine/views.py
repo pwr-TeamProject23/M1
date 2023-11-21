@@ -2,8 +2,8 @@ from fastapi import APIRouter
 from starlette.responses import JSONResponse
 
 from rms.search_engine.models import SearchBody, SearchResponse
-from rms.search_engine.models.dblp_models import DblpAuthorSearchBody, DblpAuthorResponse
-from rms.search_engine.models.scholar_models import ScholarAuthorSearchBody, ScholarAuthorResponse
+from rms.search_engine.models.dblp_models import DblpAuthorResponse
+from rms.search_engine.models.scholar_models import ScholarAuthorResponse
 from rms.search_engine.services import search_scopus_service, get_author_dblp_service, get_author_scholar_service
 
 router = APIRouter()
