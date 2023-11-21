@@ -5,9 +5,13 @@ class DblpAuthorSearchBody(BaseModel):
     author_name: str
 
 
-class DblpAuthorResponse(BaseModel):
+class DblpAuthor(BaseModel):
     dblp_id: str | None
     dblp_url: str | None
+
+
+class DblpAuthorResponse(BaseModel):
+    authors: list[DblpAuthor] = []
 
 
 class Note(BaseModel):
@@ -16,7 +20,16 @@ class Note(BaseModel):
 
 
 class Notes(BaseModel):
-    note: Note | None
+    note: list[Note] | None = Field(default=None)
+
+    @field_validator('note', mode='before')
+    @classmethod
+    def parse_note(cls, v):
+        if isinstance(v, list):
+            return v
+        if isinstance(v, dict):
+            return [v]
+        return None
 
 
 class AuthorInfo(BaseModel):

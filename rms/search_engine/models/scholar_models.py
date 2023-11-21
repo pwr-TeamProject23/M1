@@ -5,7 +5,7 @@ class ScholarAuthorSearchBody(BaseModel):
     author_name: str
 
 
-class ScholarAuthorResponse(BaseModel):
+class ScholarAuthor(BaseModel):
     scholar_id: str | None
     scholar_url: str | None
     url_picture: str | None
@@ -18,7 +18,11 @@ class ScholarAuthorResponse(BaseModel):
     email_domain: str | None
 
 
-class ScholarAuthorClientResponse(BaseModel):
+class ScholarAuthorResponse(BaseModel):
+    authors: list[ScholarAuthor] = []
+
+
+class ScholarApiAuthor(BaseModel):
     container_type: str | None
     filled: list[str] | None
     source: str | None
@@ -36,3 +40,7 @@ class ScholarAuthorClientResponse(BaseModel):
     i10index5y: int | None
     organization: int | None = None
     homepage: str | None = None
+
+
+class ScholarAuthorClientResponse(BaseModel):
+    authors: list[ScholarApiAuthor] = []
