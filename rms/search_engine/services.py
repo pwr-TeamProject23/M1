@@ -1,7 +1,7 @@
 from rms.search_engine.clients import ScopusArticleSearchApi, DblpAuthorSearchApi, ScholarAuthorSearchApi
 from rms.search_engine.models import SearchBody, ScopusSearchResponse, SearchResponse, Affiliation, Author, Article
-from rms.search_engine.models.dblp_models import DblpAuthorSearchBody, DblpAuthorResponse
-from rms.search_engine.models.scholar_models import ScholarAuthorSearchBody, ScholarAuthorResponse
+from rms.search_engine.models.dblp_models import DblpAuthorSearchBody, DblpAuthorResponse, DblpAuthor
+from rms.search_engine.models.scholar_models import ScholarAuthorSearchBody, ScholarAuthorResponse, ScholarAuthor
 
 
 def transform_scopus_response(scopus_response: ScopusSearchResponse) -> SearchResponse:
@@ -73,34 +73,48 @@ async def search_scopus_service(body: SearchBody) -> SearchResponse:
     return transform_scopus_response(scopus_response)
 
 
-async def get_author_dblp_service(body: DblpAuthorSearchBody) -> DblpAuthorResponse | None:
+async def get_author_dblp_service(author_name: str) -> DblpAuthorResponse | None:
     client = DblpAuthorSearchApi()
-    response = await client.search(body)
+    response = await client.search(author_name)
 
     if response.result.hits.total == 0:
-        return None
+        return DblpAuthorResponse(authors=[])
 
-    author = response.result.hits.hit[0]
+    authors_hits = response.result.hits.hit
 
-    return DblpAuthorResponse(dblp_id=author.id, dblp_url=author.info.url)
+    authors = []
+    for author in authors_hits:
+        if author.info is not None:
+            dblp_author = DblpAuthor(
+                dblp_id=author.id,
+                dblp_url=author.info.url
+            )
+            authors.append(dblp_author)
+
+    return DblpAuthorResponse(authors=authors)
 
 
-async def get_author_scholar_service(body: ScholarAuthorSearchBody) -> ScholarAuthorResponse | None:
+async def get_author_scholar_service(author_name: str) -> ScholarAuthorResponse | None:
     client = ScholarAuthorSearchApi()
-    response = await client.search(body)
+    response = await client.search(author_name)
 
-    if response is None:
-        return None
+    if not response or not response.authors:
+        return ScholarAuthorResponse(authors=[])
 
-    return ScholarAuthorResponse(
-        scholar_id=response.scholar_id,
-        scholar_url=f"https://scholar.google.com/citations?user={response.scholar_id}",
-        url_picture=response.url_picture,
-        homepage=response.homepage,
-        cited_by=response.citedby,
-        cited_by_5y=response.citedby5y,
-        i10_index=response.i10index,
-        i10_index_5y=response.i10index5y,
-        interests=response.interests,
-        email_domain=response.email_domain,
-    )
+    authors = [
+        ScholarAuthor(
+            scholar_id=response.scholar_id,
+            scholar_url=f"https://scholar.google.com/citations?user={response.scholar_id}",
+            url_picture=response.url_picture,
+            homepage=response.homepage,
+            cited_by=response.citedby,
+            cited_by_5y=response.citedby5y,
+            i10_index=response.i10index,
+            i10_index_5y=response.i10index5y,
+            interests=response.interests,
+            email_domain=response.email_domain
+        )
+        for response in response.authors
+    ]
+
+    return ScholarAuthorResponse(authors=authors)

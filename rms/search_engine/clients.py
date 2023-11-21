@@ -2,8 +2,8 @@ import httpx
 from abc import ABC
 from typing import Any
 from rms.search_engine.models import SearchBody, ScopusSearchResponse
-from rms.search_engine.models.dblp_models import DblpAuthorSearchBody, DblpAuthorClientResponse
-from rms.search_engine.models.scholar_models import ScholarAuthorSearchBody, ScholarAuthorClientResponse
+from rms.search_engine.models.dblp_models import DblpAuthorClientResponse
+from rms.search_engine.models.scholar_models import ScholarAuthorClientResponse, ScholarApiAuthor
 from rms.search_engine.utils import StopWordsProcessor
 from rms.settings import Settings
 from scholarly import scholarly
@@ -81,8 +81,9 @@ class DblpClient(ABC):
 
 
 class DblpAuthorSearchApi(DblpClient):
-    async def search(self, query: DblpAuthorSearchBody) -> DblpAuthorClientResponse:
-        params = self.build_params(query)
+
+    async def search(self, author_name: str) -> DblpAuthorClientResponse:
+        params = self.build_params(author_name)
 
         async with httpx.AsyncClient() as client:
             response = await client.get(self.dblp_search_api_endpoint, headers=self.headers, params=params)
@@ -91,8 +92,11 @@ class DblpAuthorSearchApi(DblpClient):
             return DblpAuthorClientResponse(**response.json())
 
     @staticmethod
-    def build_params(query: DblpAuthorSearchBody) -> dict[str, Any]:
-        params = {"q": query.author_name, "format": "json"}
+    def build_params(author_name: str) -> dict[str, Any]:
+        params = {
+            "q": author_name,
+            "format": "json"
+        }
 
         return params
 
@@ -103,12 +107,18 @@ class ScholarClient(ABC):
 
 
 class ScholarAuthorSearchApi(ScholarClient):
-    async def search(self, query: ScholarAuthorSearchBody) -> ScholarAuthorClientResponse | None:
-        try:
-            search_query = scholarly.search_author(query.author_name)
-            first_author_result = next(search_query)
-            author = scholarly.fill(first_author_result, sections=self.sections)
-        except StopIteration:
-            return None
 
-        return ScholarAuthorClientResponse(**author)
+    async def search(self, author_name: str) -> ScholarAuthorClientResponse | None:
+        authors = []
+
+        try:
+            search_query = scholarly.search_author(author_name)
+
+            for item in search_query:
+                author = scholarly.fill(item, sections=self.sections)
+                authors.append(ScholarApiAuthor(**author))
+
+        except StopIteration:
+            pass
+        finally:
+            return ScholarAuthorClientResponse(authors=authors)
