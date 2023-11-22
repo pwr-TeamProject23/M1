@@ -24,7 +24,7 @@ class Article(BaseModel):
     name: str
     notes: str
     file_id: int
-    creator_id: int
+    creator_id: Optional[int]
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
@@ -48,7 +48,7 @@ class ArticleWithDetails(Article):
     file_id: ClassVar[None] = None
     file: ArticleFile
     creator_id: ClassVar[None] = None
-    creator: ArticleCreator
+    creator: Optional[ArticleCreator]
 
     name: str
     notes: str
@@ -56,7 +56,7 @@ class ArticleWithDetails(Article):
 
 class ArticleWithCreator(Article):
     creator_id: ClassVar[None] = None
-    creator: ArticleCreator
+    creator: Optional[ArticleCreator]
 
 
 class ArticlePartialUpdate(BaseModel):
@@ -120,14 +120,10 @@ def get_article_details(db: Session, article_id: int) -> ArticleWithDetails | No
     )
 
 
-def get_article_creator(db: Session, creator_id: int) -> ArticleCreator:
+def get_article_creator(db: Session, creator_id: int) -> ArticleCreator | None:
     creator = UserManager.find_by_id(db, creator_id)
     if not creator:
-        creator_info = ArticleCreator(
-            first_name=None,
-            last_name=None,
-            email=None,
-        )
+        return None
     else:
         creator_info = ArticleCreator(
             first_name=creator.first_name,

@@ -61,13 +61,13 @@ def test_get_articles_detail_view__not_found_object(client):
     assert data["detail"] == "Not Found"
 
 
-def test_post_article(client, db):
+def test_post_article(authenticated_client, db):
     f = FileOrm(name="x", path="x", uploaded_at=datetime.now())
     f = FileManager.create(db, f)
 
     payload = {"name": "Johny", "notes": "some notes", "file_id": f.id}
 
-    response = client.post("/article", json=payload)
+    response = authenticated_client.post("/article", json=payload)
     data = response.json()
 
     assert response.status_code == 200
@@ -79,10 +79,10 @@ def test_post_article(client, db):
 
 
 @pytest.mark.parametrize("property_,value", (("name", "Name"), ("notes", "Notes")))
-def test_patch_article(property_, value, client, db, single_article):
+def test_patch_article(property_, value, authenticated_client, db, single_article):
     article, _ = single_article
 
-    response = client.patch(f"/article/{article.id}", json={property_: value})
+    response = authenticated_client.patch(f"/article/{article.id}", json={property_: value})
     data = response.json()
 
     assert response.status_code == 200

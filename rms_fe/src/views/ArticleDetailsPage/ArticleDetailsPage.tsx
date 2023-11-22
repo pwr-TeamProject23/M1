@@ -4,7 +4,7 @@ import { extractArticlePdfFeatures, singleArticle, updateArticle } from "../../c
 import { searchArticles } from "../../clients/search-engine.ts"
 import { Button, Flex, message, Space, Tag, Typography, Steps, Divider, FloatButton } from "antd"
 import { EditableTextField } from "../../components/EditableTextField.tsx"
-import { ArticleUpdate } from "../../types/api/article.ts"
+import { ArticleCreator, ArticleUpdate } from "../../types/api/article.ts"
 import { EyeOutlined, LeftCircleOutlined } from "@ant-design/icons"
 import * as React from "react"
 import { ArticlePreviewModal } from "./ArticlePreviewModal.tsx"
@@ -41,14 +41,14 @@ const useExtractArticleFeatures = (id: string | number) => {
 const useSearchArticles = () => {
     return useMutation<SearchResponse, Error, SearchBody>({
         mutationFn: (searchBody: SearchBody) => {
-            return searchArticles(searchBody);
+            return searchArticles(searchBody)
         },
         onError: (error) => {
-            message.error(error.message);
-            console.error(error);
+            message.error(error.message)
+            console.error(error)
         },
-    });
-};
+    })
+}
 
 enum Step {
     ExtractFeatures = 0,
@@ -56,7 +56,6 @@ enum Step {
 }
 
 export const ArticleDetailsPage = () => {
-
     const { id } = useParams()
     const navigate = useNavigate()
 
@@ -65,10 +64,10 @@ export const ArticleDetailsPage = () => {
     const updateArticle = useUpdateArticle(id!)
 
     const [pdfPreviewIsOpen, setPdfPreviewIsOpen] = useState(false)
-    const [recommendations, setRecommendations] = useState<SearchResponse>();
-    const [currentStep, setCurrentStep] = useState(0);
+    const [recommendations, setRecommendations] = useState<SearchResponse>()
+    const [currentStep, setCurrentStep] = useState(0)
 
-    const stepsRef = React.useRef<HTMLDivElement>(null);
+    const stepsRef = React.useRef<HTMLDivElement>(null)
 
     const notesStyle: React.CSSProperties = {
         border: "1px solid gray",
@@ -78,23 +77,23 @@ export const ArticleDetailsPage = () => {
 
     React.useEffect(() => {
         if (currentStep === Step.Recommendations) {
-            stepsRef.current?.scrollIntoView({ behavior: "smooth" });
+            stepsRef.current?.scrollIntoView({ behavior: "smooth" })
         }
-    }, [currentStep]);
+    }, [currentStep])
 
-    const searchArticles = useSearchArticles();
+    const searchArticles = useSearchArticles()
 
     const handleGenerateRecommendations = (searchBody: SearchBody) => {
         searchArticles.mutate(searchBody, {
             onSuccess: (data) => {
-                setCurrentStep(Step.Recommendations);
-                setRecommendations(data);
-            }
-        });
-    };
+                setCurrentStep(Step.Recommendations)
+                setRecommendations(data)
+            },
+        })
+    }
     const handleStepChange = (current: number) => {
-        setCurrentStep(current);
-    };
+        setCurrentStep(current)
+    }
 
     if (!article.data) {
         return <div>is loading</div>
@@ -102,20 +101,26 @@ export const ArticleDetailsPage = () => {
 
     const steps = [
         {
-            title: 'Extract Features',
+            title: "Extract Features",
             content: (
-                <ArticleFeatures features={articleFeatures.data} onFetch={articleFeatures.refetch} isLoadingFeatures={articleFeatures.isLoading} isLoadingArticles={searchArticles.isPending} onGenerateRecommendations={handleGenerateRecommendations} />
-            )
+                <ArticleFeatures
+                    features={articleFeatures.data}
+                    onFetch={articleFeatures.refetch}
+                    isLoadingFeatures={articleFeatures.isLoading}
+                    isLoadingArticles={searchArticles.isPending}
+                    onGenerateRecommendations={handleGenerateRecommendations}
+                />
+            ),
         },
         {
-            title: 'Recommendations',
+            title: "Recommendations",
             content: (
                 <div style={{ minHeight: "100vh" }}>
                     <ArticleRecommendations recommendations={recommendations} />
                 </div>
             ),
-        }
-    ];
+        },
+    ]
 
     return (
         <div style={{ padding: "2em 4em" }}>
@@ -136,7 +141,7 @@ export const ArticleDetailsPage = () => {
             </Flex>
 
             <Typography.Paragraph>
-                Created by: Jan Kowalski on {new Date(article.data.created_at).toLocaleString()}
+                <ArticleDetails creator={article.data.creator} createdAt={article.data.created_at} />
             </Typography.Paragraph>
             <Space>
                 <Tag
@@ -164,18 +169,33 @@ export const ArticleDetailsPage = () => {
             </EditableTextField>
 
             <Flex vertical align="center">
-                <Flex ref={stepsRef} vertical align="center" style={{ position: "sticky", top: "0", background: "white", zIndex: "1000", width: "100%", paddingTop: "10px" }}>
+                <Flex
+                    ref={stepsRef}
+                    vertical
+                    align="center"
+                    style={{
+                        position: "sticky",
+                        top: "0",
+                        background: "white",
+                        zIndex: "1000",
+                        width: "100%",
+                        paddingTop: "10px",
+                    }}
+                >
                     <Steps
                         current={currentStep}
                         style={{ width: "50%" }}
-                        percent={(articleFeatures.isFetched && currentStep === 0) ? 50 : 0}
+                        percent={articleFeatures.isFetched && currentStep === 0 ? 50 : 0}
                         labelPlacement="vertical"
                         onChange={handleStepChange}
-                        items={steps} />
+                        items={steps}
+                    />
 
                     <Divider style={{ margin: "0px" }} />
                 </Flex>
-                <div style={{ width: "70vw" }} className="steps-content">{steps[currentStep].content}</div>
+                <div style={{ width: "70vw" }} className="steps-content">
+                    {steps[currentStep].content}
+                </div>
             </Flex>
 
             <ArticlePreviewModal
@@ -185,7 +205,20 @@ export const ArticleDetailsPage = () => {
             />
 
             <FloatButton.BackTop />
-
         </div>
+    )
+}
+
+type ArticleDetailsProps = {
+    creator: ArticleCreator
+    createdAt: string
+}
+
+export const ArticleDetails = (props: ArticleDetailsProps) => {
+    const fullName = props.creator ? `${props.creator.first_name} ${props.creator.last_name}` : "Unknown"
+    return (
+        <>
+            Created by: {fullName} on {new Date(props.createdAt).toLocaleString()}
+        </>
     )
 }

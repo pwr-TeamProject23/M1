@@ -1,15 +1,17 @@
 import pytest
+from datetime import datetime, timedelta
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 from starlette.testclient import TestClient
 
+from rms.auth.managers import UserManager, UserCookieManager
 from rms.migrations.runner import MigrationRunner
 from rms.settings import Settings
 
 from rms.__main__ import app
+from rms.auth.models import UserCookieOrm
 from rms.utils.postgres import get_db
 import psycopg2
-
 
 settings = Settings()
 
@@ -74,3 +76,30 @@ def client(db):
 
     with TestClient(app) as c:
         yield c
+
+
+@pytest.fixture(scope="function")
+def user(db):
+    user = UserManager.create_user(
+        db,
+        email="mrbeast@gmail.com",
+        first_name="Mr",
+        last_name="Beast",
+        password="123456"
+    )
+
+    return user
+
+
+@pytest.fixture(scope="function")
+def authenticated_client(db, client, user):
+    auth_cookie = UserCookieOrm(
+        user_id=user.id,
+        value="123456",
+        valid_until=datetime.now() + timedelta(days=1),
+    )
+    UserCookieManager.create(db, auth_cookie)
+
+    client.cookies["auth_cookie"] = auth_cookie.value
+
+    return client

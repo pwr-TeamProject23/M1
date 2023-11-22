@@ -2,15 +2,16 @@ import {
     Article,
     ArticleUpdate,
     ArticleWithDetails,
+    ArticleWithCreator,
     CreateArticle,
     ExtractedPdfFeatures,
 } from "../types/api/article.ts"
 import axios from "axios"
 
-export const listArticles = async (): Promise<Article[]> => {
+export const listArticles = async (): Promise<ArticleWithCreator[]> => {
     const response = await axios.get("article/")
 
-    return response.data as Article[]
+    return response.data as ArticleWithCreator[]
 }
 export const createArticle = async (data: CreateArticle): Promise<Article> => {
     const response = await axios.post("article/", data)

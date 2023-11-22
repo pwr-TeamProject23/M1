@@ -1,4 +1,4 @@
-import { Article } from "../../types/api/article.ts"
+import { ArticleWithCreator } from "../../types/api/article.ts"
 import { Avatar, Button, Row, Table } from "antd"
 import type { ColumnsType, ColumnType } from "antd/es/table"
 import { getLocale } from "../../utils/locale.ts"
@@ -6,11 +6,11 @@ import { UserOutlined } from "@ant-design/icons"
 import { useNavigate } from "react-router-dom"
 
 export type ArticlesTableProps = {
-    data: Article[]
+    data: ArticleWithCreator[]
     isLoading: boolean
 }
 
-const tableColumns: ColumnsType<Article> = [
+const tableColumns: ColumnsType<ArticleWithCreator> = [
     {
         title: "Id",
         dataIndex: "id",
@@ -23,13 +23,12 @@ const tableColumns: ColumnsType<Article> = [
     },
     {
         title: "Author",
-        dataIndex: "author",
+        dataIndex: "creator",
         key: "author",
         align: "end",
-        render: () => (
-            // TODO: Replace with real person when auth is finished
+        render: (value) => (
             <p>
-                Jan Kowalski
+                {value ? `${value.first_name} ${value.last_name}` : "Unknown"}
                 <Avatar size={32} icon={<UserOutlined />} style={{ marginLeft: "8px" }} />
             </p>
         ),
@@ -52,7 +51,7 @@ const tableColumns: ColumnsType<Article> = [
 export const ArticlesTable = (props: ArticlesTableProps) => {
     const navigate = useNavigate()
 
-    const actionsColumn: ColumnType<Article> = {
+    const actionsColumn: ColumnType<ArticleWithCreator> = {
         title: "Actions",
         key: "actions",
         align: "end",
