@@ -11,7 +11,7 @@ class DblpAuthorResponse(BaseModel):
 
 
 class Note(BaseModel):
-    type: str | None = Field(None, alias='@type')
+    type: str | None = Field(None, alias="@type")
     text: str | None
 
 
@@ -26,32 +26,32 @@ class AuthorInfo(BaseModel):
 
 
 class Hit(BaseModel):
-    score: str | None = Field(None, alias='@score')
-    id: str | None = Field(None, alias='@id')
+    score: str | None = Field(None, alias="@score")
+    id: str | None = Field(None, alias="@id")
     info: AuthorInfo | None
-    url: str | None = Field(None, alias='@url')
+    url: str | None = Field(None, alias="@url")
 
 
 class Hits(BaseModel):
-    total: int | None = Field(None, alias='@total')
-    computed: int | None = Field(None, alias='@computed')
-    sent: int | None = Field(None, alias='@sent')
-    first: int | None = Field(None, alias='@first')
+    total: int | None = Field(None, alias="@total")
+    computed: int | None = Field(None, alias="@computed")
+    sent: int | None = Field(None, alias="@sent")
+    first: int | None = Field(None, alias="@first")
     hit: list[Hit] = []
 
 
 class Completion(BaseModel):
-    sc: int | None = Field(None, alias='@sc', description="Score of relevance indicator")
-    dc: int | None = Field(None, alias='@dc', description="Score of relevance indicator(secondary metric")
-    oc: int | None = Field(None, alias='@oc', description="Score of relevance indicator(overall metric)")
-    id: str | None = Field(None, alias='@id')
+    sc: int | None = Field(None, alias="@sc", description="Score of relevance indicator")
+    dc: int | None = Field(None, alias="@dc", description="Score of relevance indicator(secondary metric")
+    oc: int | None = Field(None, alias="@oc", description="Score of relevance indicator(overall metric)")
+    id: str | None = Field(None, alias="@id")
     text: str | None
 
 
 class Completions(BaseModel):
-    total: int | None = Field(None, alias='@total')
-    computed: int | None = Field(None, alias='@computed')
-    sent: int | None = Field(None, alias='@sent')
+    total: int | None = Field(None, alias="@total")
+    computed: int | None = Field(None, alias="@computed")
+    sent: int | None = Field(None, alias="@sent")
     c: list[Completion] = Field([], description="List of completion suggestions")
 
     @field_validator("c", mode="before")
@@ -67,12 +67,12 @@ class Completions(BaseModel):
 
 
 class Time(BaseModel):
-    unit: str | None = Field(None, alias='@unit')
+    unit: str | None = Field(None, alias="@unit")
     text: str | None
 
 
 class Status(BaseModel):
-    code: str | None = Field(None, alias='@code')
+    code: str | None = Field(None, alias="@code")
     text: str | None
 
 

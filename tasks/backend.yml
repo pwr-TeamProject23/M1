@@ -13,3 +13,6 @@ tasks:
 
   up-prod:
     cmd: docker compose -f docker-compose.production.yml up -d
+
+  py-shell:
+    cmd: docker compose exec backend python -i rms/shell.py

@@ -1,5 +1,13 @@
 from .models import SearchBody, SearchResponse, Affiliation, Author, Article
-from .scopus_models import ScopusSearch, ScopusSearchResponse, ScopusAffiliation, ScopusAuthor, ScopusEntry, ScopusLink, ScopusAFID
+from .scopus_models import (
+    ScopusSearch,
+    ScopusSearchResponse,
+    ScopusAffiliation,
+    ScopusAuthor,
+    ScopusEntry,
+    ScopusLink,
+    ScopusAFID,
+)
 
 
 __all__ = (
