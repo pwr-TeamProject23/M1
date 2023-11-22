@@ -1,5 +1,6 @@
 from datetime import datetime
 
+import bcrypt
 from sqlalchemy import ForeignKey, Table, Column
 from sqlalchemy.orm import mapped_column, Mapped, relationship
 
@@ -46,6 +47,9 @@ class UserOrm(BaseModel):
 
     created_at: Mapped[datetime]
     last_login: Mapped[datetime]
+
+    def set_password(self, new_password: str) -> None:
+        self.password = bcrypt.hashpw(new_password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
 
     def __repr__(self) -> str:
         return f"User({self.first_name} {self.last_name})"

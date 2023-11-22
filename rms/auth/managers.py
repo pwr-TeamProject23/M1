@@ -1,6 +1,5 @@
 from datetime import datetime
 
-import bcrypt
 from sqlalchemy import text, bindparam
 from sqlalchemy.orm import Session
 
@@ -37,14 +36,15 @@ class UserManager(BaseModelManager[UserOrm]):
         first_name: str,
         last_name: str,
     ) -> UserOrm:
-        hashed_password = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
         user = UserOrm(
             email=email,
-            password=hashed_password,
+            password=password,
             first_name=first_name,
             last_name=last_name,
             created_at=datetime.now(),
         )
+
+        user.set_password(password)
 
         return cls.create(db, user)
 

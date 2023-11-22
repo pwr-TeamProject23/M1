@@ -8,7 +8,6 @@ def transform_scopus_response(scopus_response: ScopusSearchResponse) -> SearchRe
     articles = []
 
     for entry in scopus_response.search_results.entry:
-
         if entry.error is not None:
             continue
 
@@ -18,7 +17,7 @@ def transform_scopus_response(scopus_response: ScopusSearchResponse) -> SearchRe
                 scopus_id=affiliation.afid,
                 name=affiliation.affilname,
                 city=affiliation.affiliation_city,
-                country=affiliation.affiliation_country
+                country=affiliation.affiliation_country,
             )
             for affiliation in entry.affiliation
         ]
@@ -31,7 +30,7 @@ def transform_scopus_response(scopus_response: ScopusSearchResponse) -> SearchRe
                 surname=author.surname,
                 given_name=author.given_name,
                 initials=author.initials,
-                affiliation_ids=[afid.value for afid in author.afid]
+                affiliation_ids=[afid.value for afid in author.afid],
             )
             for author in entry.author
         ]
@@ -57,14 +56,14 @@ def transform_scopus_response(scopus_response: ScopusSearchResponse) -> SearchRe
             issue_id=entry.issue_id,
             doi_url=f"https://doi.org/{entry.doi}" if entry.doi else None,
             article_number=entry.article_number,
-            keywords=[keyword.strip() for keyword in (entry.authhKeywords or "").split("|") if keyword.strip()]
+            keywords=[keyword.strip() for keyword in (entry.authhKeywords or "").split("|") if keyword.strip()],
         )
         articles.append(article)
 
     return SearchResponse(
         articles=articles,
         total_results=scopus_response.search_results.total_results,
-        items_per_page=scopus_response.search_results.items_per_page
+        items_per_page=scopus_response.search_results.items_per_page,
     )
 
 
@@ -83,10 +82,7 @@ async def get_author_dblp_service(body: DblpAuthorSearchBody) -> DblpAuthorRespo
 
     author = response.result.hits.hit[0]
 
-    return DblpAuthorResponse(
-        dblp_id=author.id,
-        dblp_url=author.info.url
-    )
+    return DblpAuthorResponse(dblp_id=author.id, dblp_url=author.info.url)
 
 
 async def get_author_scholar_service(body: ScholarAuthorSearchBody) -> ScholarAuthorResponse | None:
@@ -106,5 +102,5 @@ async def get_author_scholar_service(body: ScholarAuthorSearchBody) -> ScholarAu
         i10_index=response.i10index,
         i10_index_5y=response.i10index5y,
         interests=response.interests,
-        email_domain=response.email_domain
+        email_domain=response.email_domain,
     )

@@ -10,18 +10,13 @@ from scholarly import scholarly
 
 
 class ScopusClient(ABC):
-
     def __init__(self):
         self.settings = Settings()
-        self.headers = {
-            "httpAccept": "application/json",
-            "X-ELS-APIKey": self.settings.scopus_api_key
-        }
+        self.headers = {"httpAccept": "application/json", "X-ELS-APIKey": self.settings.scopus_api_key}
         self.scopus_search_api_endpoint = self.settings.scopus_search_endpoint
 
 
 class ScopusArticleSearchApi(ScopusClient):
-
     def __init__(self):
         super().__init__()
         self.stop_words_processor = StopWordsProcessor()
@@ -39,7 +34,7 @@ class ScopusArticleSearchApi(ScopusClient):
         criteria = [
             self._build_title_criteria(query.title),
             self._build_keywords_criteria(query.keywords),
-            self._build_abstract_keywords_criteria(query.abstract_keywords)
+            self._build_abstract_keywords_criteria(query.abstract_keywords),
         ]
 
         combined_criteria = " AND ".join(filter(None, criteria))
@@ -48,7 +43,7 @@ class ScopusArticleSearchApi(ScopusClient):
             "query": combined_criteria,
             "count": query.count,
             "view": "COMPLETE",
-            "sort": "-relevancy,-citedby-count,-coverDate"
+            "sort": "-relevancy,-citedby-count,-coverDate",
         }
 
         return params
@@ -77,7 +72,6 @@ class ScopusArticleSearchApi(ScopusClient):
 
 
 class DblpClient(ABC):
-
     def __init__(self):
         self.settings = Settings()
         self.headers = {
@@ -87,7 +81,6 @@ class DblpClient(ABC):
 
 
 class DblpAuthorSearchApi(DblpClient):
-
     async def search(self, query: DblpAuthorSearchBody) -> DblpAuthorClientResponse:
         params = self.build_params(query)
 
@@ -99,22 +92,17 @@ class DblpAuthorSearchApi(DblpClient):
 
     @staticmethod
     def build_params(query: DblpAuthorSearchBody) -> dict[str, Any]:
-        params = {
-            "q": query.author_name,
-            "format": "json"
-        }
+        params = {"q": query.author_name, "format": "json"}
 
         return params
 
 
 class ScholarClient(ABC):
-
     def __init__(self):
         self.sections = ["basics", "indices"]
 
 
 class ScholarAuthorSearchApi(ScholarClient):
-
     async def search(self, query: ScholarAuthorSearchBody) -> ScholarAuthorClientResponse | None:
         try:
             search_query = scholarly.search_author(query.author_name)
