@@ -10,8 +10,10 @@ from rms.articles.services import (
     ArticleWithDetails,
     get_article_details,
     partial_update_article,
-    ArticlePartialUpdate,
+    ArticlePartialUpdate, ArticleWithCreator,
 )
+from rms.auth.dependencies import get_current_user
+from rms.auth.models import UserOrm
 from rms.file_processing.managers import FileManager
 from rms.file_processing.services import PdfArticleData, download_and_process_file
 from rms.utils.exceptions import NotFound
@@ -21,13 +23,14 @@ router = APIRouter()
 
 
 @router.get("/")
-def list_articles_view(db: Session = Depends(get_db)) -> list[Article]:
+def list_articles_view(db: Session = Depends(get_db)) -> list[ArticleWithCreator]:
     return list_articles(db)
 
 
 @router.post("/")
-def create_article_view(article: CreateArticleData, db: Session = Depends(get_db)) -> Article:
-    return create_article(db, article)
+def create_article_view(article: CreateArticleData, db: Session = Depends(get_db),
+                        user: UserOrm = Depends(get_current_user)) -> Article:
+    return create_article(db, user, article)
 
 
 @router.get("/{article_id}")
@@ -42,9 +45,9 @@ def get_article_details_view(article_id: int, db: Session = Depends(get_db)) -> 
 
 @router.patch("/{article_id}")
 def partial_update_article_view(
-    article_id: int,
-    article: ArticlePartialUpdate,
-    db: Session = Depends(get_db),
+        article_id: int,
+        article: ArticlePartialUpdate,
+        db: Session = Depends(get_db),
 ) -> Article:
     article = partial_update_article(db, article_id, article)
 
