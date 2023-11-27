@@ -22,7 +22,7 @@ export const ArticleFeatures = (props: ArticleFeaturesProps) => {
     const [form] = Form.useForm<IArticleFeaturesForm>()
     const initialValues = {
         ...props.features,
-        count: 3
+        count: 10
     }
 
     if (!props.features) {
