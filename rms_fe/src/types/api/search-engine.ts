@@ -10,8 +10,8 @@ export type Author = {
   scopus_url: string | undefined;
   scopus_id: string | undefined;
   name: string | undefined;
-  surname: string | undefined;
-  given_name: string | undefined;
+  surname: string;
+  given_name: string;
   initials: string | undefined;
   affiliation_ids: string[];
 };
@@ -61,9 +61,6 @@ export type DblpAuthorResponse = {
   authors: DblpAuthor[];
 };
 
-export type DblpAuthorSearchBody = {
-  author_name: string;
-};
 
 export type ScholarAuthor = {
   scholar_id: string | undefined;
@@ -82,6 +79,17 @@ export type ScholarAuthorResponse = {
   authors: ScholarAuthor[];
 };
 
-export type ScholarAuthorSearchBody = {
-  author_name: string;
+export type ScopusAuthor = {
+  scopus_id: string | undefined;
+  scopus_url: string | undefined;
+  eid: string | undefined;
+  orcid: string | undefined;
+  given_name: string | undefined;
+  surname: string | undefined;
+  initials: string | undefined;
+  documents_count: number | undefined;
 };
+
+export type ScopusAuthorResponse = {
+  authors: ScopusAuthor[];
+}
