@@ -58,3 +58,30 @@ class ScopusSearch(BaseModel):
 
 class ScopusSearchResponse(BaseModel):
     search_results: ScopusSearch | None = Field(alias="search-results", default=None)
+
+
+class PreferredName(BaseModel):
+    surname: str | None = None
+    given_name: str | None = Field(alias="given-name", default=None)
+    initials: str | None = None
+
+
+class ScopusAuthorEntry(BaseModel):
+    identifier: str | None = Field(alias="dc:identifier", default=None)
+    eid: str | None = None
+    orcid: str | None = None
+    preferred_name: PreferredName | None = Field(alias="preferred-name", default=None)
+    name_variant: list[PreferredName] = Field(alias="name-variant", default=[])
+    document_count: str | None = Field(alias="document-count", default=None)
+    link: list[ScopusLink] = []
+    error: str | None = Field(alias="error", default=None)
+
+
+class ScopusAuthorSearch(BaseModel):
+    total_results: str | None = Field(alias="opensearch:totalResults", default=None)
+    items_per_page: str | None = Field(alias="opensearch:itemsPerPage", default=None)
+    entry: list[ScopusAuthorEntry] = []
+
+
+class ScopusAuthorResponse(BaseModel):
+    search_results: ScopusAuthorSearch | None = Field(alias="search-results", default=None)

@@ -4,6 +4,7 @@ from typing import Any
 from rms.search_engine.models import SearchBody, ScopusSearchResponse
 from rms.search_engine.models.dblp_models import DblpAuthorClientResponse
 from rms.search_engine.models.scholar_models import ScholarAuthorClientResponse, ScholarApiAuthor
+from rms.search_engine.models.scopus_models import ScopusAuthorResponse
 from rms.search_engine.utils import StopWordsProcessor
 from rms.settings import Settings
 from scholarly import scholarly
@@ -14,9 +15,10 @@ class ScopusClient(ABC):
         self.settings = Settings()
         self.headers = {"httpAccept": "application/json", "X-ELS-APIKey": self.settings.scopus_api_key}
         self.scopus_search_api_endpoint = self.settings.scopus_search_endpoint
+        self.scopus_author_api_endpoint = self.settings.scopus_author_endpoint
 
 
-class ScopusArticleSearchApi(ScopusClient):
+class ScopusApi(ScopusClient):
     def __init__(self):
         super().__init__()
         self.stop_words_processor = StopWordsProcessor()
@@ -29,6 +31,23 @@ class ScopusArticleSearchApi(ScopusClient):
             response.raise_for_status()
 
             return ScopusSearchResponse(**response.json())
+
+    async def get_author(self, author_lastname: str, author_firstname: str) -> ScopusAuthorResponse:
+        params = self.build_author_params(author_lastname, author_firstname)
+
+        async with httpx.AsyncClient() as client:
+            response = await client.get(self.scopus_author_api_endpoint, headers=self.headers, params=params)
+            response.raise_for_status()
+
+            return ScopusAuthorResponse(**response.json())
+
+    def build_author_params(self, author_lastname: str, author_firstname: str) -> dict[str, Any]:
+        params = {
+            "query": f"AUTHLASTNAME({author_lastname}) AND AUTHFIRST({author_firstname})",
+            "view": "STANDARD",
+        }
+
+        return params
 
     def build_params(self, query: SearchBody) -> dict[str, Any]:
         criteria = [

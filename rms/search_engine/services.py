@@ -1,6 +1,7 @@
-from rms.search_engine.clients import ScopusArticleSearchApi, DblpAuthorSearchApi, ScholarAuthorSearchApi
+from rms.search_engine.clients import ScopusApi, DblpAuthorSearchApi, ScholarAuthorSearchApi
 from rms.search_engine.models import SearchBody, ScopusSearchResponse, SearchResponse, Affiliation, Author, Article
 from rms.search_engine.models.dblp_models import DblpAuthorResponse, DblpAuthor
+from rms.search_engine.models.models import AuthorSearch, ScopusAuthorResponse
 from rms.search_engine.models.scholar_models import ScholarAuthorResponse, ScholarAuthor
 
 
@@ -68,9 +69,36 @@ def transform_scopus_response(scopus_response: ScopusSearchResponse) -> SearchRe
 
 
 async def search_scopus_service(body: SearchBody) -> SearchResponse:
-    client = ScopusArticleSearchApi()
+    client = ScopusApi()
     scopus_response = await client.search(body)
     return transform_scopus_response(scopus_response)
+
+
+async def get_author_scopus_service(author_lastname: str, author_firstname: str) -> ScopusAuthorResponse:
+    client = ScopusApi()
+    response = await client.get_author(author_lastname, author_firstname)
+
+    authors = []
+
+    for entry in response.search_results.entry:
+        if entry.error is not None:
+            continue
+
+        link_dict = {link.ref: link.href for link in entry.link}
+
+        author = AuthorSearch(
+            scopus_id=entry.identifier,
+            eid=entry.eid,
+            orcid=entry.orcid,
+            surname=entry.preferred_name.surname,
+            given_name=entry.preferred_name.given_name,
+            initials=entry.preferred_name.initials,
+            document_count=entry.document_count,
+            scopus_url=link_dict.get("scopus-author"),
+        )
+        authors.append(author)
+
+    return ScopusAuthorResponse(authors=authors)
 
 
 async def get_author_dblp_service(author_name: str) -> DblpAuthorResponse | None:
