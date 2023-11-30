@@ -6,7 +6,7 @@ from pypdf import PdfReader
 
 from rms.file_processing.clients import MinioClient
 from rms.file_processing.models import FileOrm
-from rms.file_processing.services.models import PdfArticleData, FirstPagePdfData
+from rms.file_processing.services.models import PdfArticleData, FirstPagePdfData, Author
 from rms.file_processing.services.utils import on_error
 from rms.utils.list import find_index_containing
 
@@ -65,14 +65,30 @@ class FirstPageDataExtractor:
         return self.content_lines[1]
 
     @on_error(return_value=[])
-    def _extract_authors(self) -> list[str]:
+    def _extract_authors(self) -> list[Author]:
         author_idx = find_index_containing(self.content_lines, "List of Authors")
         keywords_idx = find_index_containing(self.content_lines, "Keywords")
 
-        authors = self.content_lines[author_idx:keywords_idx]
-        authors[0] = authors[0].replace("Complete List of Authors:", "").strip()
+        authors_section = self.content_lines[author_idx:keywords_idx]
 
-        return authors
+        if authors_section and "Complete List of Authors:" in authors_section[0]:
+            authors_section[0] = authors_section[0].replace("Complete List of Authors:", "").strip()
+
+        formatted_authors = []
+        current_author = ""
+
+        for line in authors_section:
+            if ';' in line:
+                if current_author:
+                    formatted_authors.append(current_author.strip().split(';')[0])
+                current_author = line
+            else:
+                current_author += " " + line
+
+        if current_author:
+            formatted_authors.append(current_author.strip().split(';')[0])
+
+        return [self._parse_singular_author(author) for author in formatted_authors]
 
     @on_error(return_value=[])
     def _extract_keywords(self) -> list[str]:
@@ -85,3 +101,11 @@ class FirstPageDataExtractor:
         keywords = [word.strip() for word in keywords]
 
         return keywords
+
+    @on_error(return_value=Author(first_name="error", last_name="processing"))
+    def _parse_singular_author(self, author: str) -> Author:
+        author_parts = author.split(",")
+        return Author(
+            first_name=author_parts[1],
+            last_name=author_parts[0]
+        )

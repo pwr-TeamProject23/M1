@@ -1,6 +1,6 @@
 from pytest_httpx import HTTPXMock
 import pytest
-from rms.search_engine.clients import ScopusArticleSearchApi
+from rms.search_engine.clients import ScopusApi
 from rms.search_engine.models import SearchBody
 
 
@@ -12,5 +12,5 @@ async def test_query_params(httpx_mock: HTTPXMock):
     )
     test_input = SearchBody(title="test", count=5)
 
-    client = ScopusArticleSearchApi()
+    client = ScopusApi()
     await client.search(test_input)
