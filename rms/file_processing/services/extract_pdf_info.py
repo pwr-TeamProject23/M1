@@ -2,13 +2,19 @@ import re
 from io import BytesIO
 from typing import BinaryIO
 
+import numpy as np
 from pypdf import PdfReader
 
 from rms.file_processing.clients import MinioClient
 from rms.file_processing.models import FileOrm
+
 from rms.file_processing.services.models import PdfArticleData, FirstPagePdfData
 from rms.file_processing.services.utils import on_error
+from rms.settings import Settings
 from rms.utils.list import find_index_containing
+
+
+settings = Settings()
 
 
 async def download_and_process_file(file: FileOrm) -> PdfArticleData:
@@ -22,12 +28,21 @@ def process_file(stream: BinaryIO) -> PdfArticleData:
     file = PdfReader(stream)
 
     first_page_text = PageFilterer(file.pages[0].extract_text()).filter()
+    second_page_text = PageFilterer(file.pages[1].extract_text()).filter()
+    third_page_text = PageFilterer(file.pages[2].extract_text()).filter()
 
     first_page_data = FirstPageDataExtractor(first_page_text).extract()
 
+    if settings.use_keyword_extraction_model:
+        from rms.file_processing.services.keyword_extractor import keyword_extractor
+
+        text_keywords = keyword_extractor(second_page_text + "\n" + third_page_text)
+    else:
+        text_keywords = np.array([])
+
     return PdfArticleData(
         name=first_page_data.name,
-        keywords=first_page_data.keywords,
+        keywords=first_page_data.keywords + text_keywords.tolist(),
         authors=first_page_data.authors,
     )
 

@@ -15,3 +15,5 @@ class Settings(BaseSettings):
 
     minio_access_id: str
     minio_secret_key: str
+    
+    use_keyword_extraction_model: bool
