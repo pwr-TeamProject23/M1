@@ -1,12 +1,13 @@
 import React from 'react';
-import { List, Avatar, Popover, Flex, Empty, Typography, Space, Tooltip, Spin, Modal } from 'antd';
+import { List, Avatar, Popover, Flex, Empty, Typography, Space, Tooltip } from 'antd';
 import { Author, SearchResponse } from '../../types/api/search-engine';
-import { CalendarOutlined, EditOutlined, LinkOutlined, WarningOutlined } from '@ant-design/icons';
+import { CalendarOutlined, EditOutlined } from '@ant-design/icons';
 import Icon, { CustomIconComponentProps } from '@ant-design/icons/lib/components/Icon';
 import "./ArticleRecommendations.css"
-import { useQuery } from '@tanstack/react-query';
-import { getAuthorDBLP, getAuthorScholar } from "../../clients/search-engine.ts"
 import { getInitials } from '../../utils/search-engine.ts';
+import DblpProfileRedirectButton from './ProfileRedirectButtons/DblpProfileRedirectButton.tsx';
+import ScopusProfileRedirectButton from './ProfileRedirectButtons/ScopusProfileRedirectButton.tsx';
+import ScholarProfileRedirectButton from './ProfileRedirectButtons/ScholarProfileRedirectButton.tsx';
 
 
 export type ArticleRecommendationsProps = {
@@ -95,7 +96,7 @@ const AuthorPopover: React.FC<{ author: Author }> = ({ author }) => {
     const initials = getInitials(author.name);
 
     const popoverContent = (
-        <Flex vertical>
+        <Flex vertical gap={15}>
             <Flex align='center' gap={10}>
                 <Avatar style={{ backgroundColor: '#87d068' }}>{initials}</Avatar>
                 <b>{author.given_name} {author.surname}</b>
@@ -112,93 +113,17 @@ const AuthorPopover: React.FC<{ author: Author }> = ({ author }) => {
 };
 
 
-const useDblpAuthor = (author_name: string) => {
-    return useQuery({ queryKey: ["author_dblp", author_name], queryFn: () => getAuthorDBLP(author_name), staleTime: 5 * 60 * 1000 })
-}
 
-const useScholarAuthor = (author_name: string) => {
-    return useQuery({ queryKey: ["author_scholar", author_name], queryFn: () => getAuthorScholar(author_name), staleTime: 5 * 60 * 1000 })
-}
 
 const AuthorLinks: React.FC<{ author: Author }> = ({ author }) => {
 
     const authorName = author.given_name + " " + author.surname;
-    const dblpAuthor = useDblpAuthor(authorName);
-    const scholarAuthor = useScholarAuthor(authorName);
-
-    const handleScopusClick = async () => {
-        window.open(author.scopus_url, '_blank');
-    };
-
-    const handleDblpClick = async () => {
-        if (dblpAuthor.data?.authors.length === 1) {
-            window.open(dblpAuthor.data.authors[0].dblp_url, '_blank');
-        } else {
-            Modal.info({
-                title: 'We have found multiple DBLP profiles that match with the author name',
-                content: (
-                    <Flex vertical gap={5}>
-                        {dblpAuthor.data?.authors.map(author => (
-                            <AuthorLink key={author.dblp_url}
-                                icon={<LinkOutlined />}
-                                label={authorName} onClick={() => window.open(author.dblp_url, '_blank')} />
-                        ))}
-                    </Flex>
-                ),
-                onOk() { },
-            });
-        }
-    };
-
-    const handleScholarClick = async () => {
-        if (scholarAuthor.data?.authors.length === 1) {
-            window.open(scholarAuthor.data.authors[0].scholar_url, '_blank');
-        } else {
-            Modal.info({
-                title: 'We have found multiple Scholar profiles that match with the author name',
-                content: (
-                    <Flex vertical gap={5}>
-                        {scholarAuthor.data?.authors.map(author => (
-                            <AuthorLink key={author.scholar_url}
-                                icon={<LinkOutlined />}
-                                label={authorName} onClick={() => window.open(author.scholar_url, '_blank')} />
-                        ))}
-                    </Flex>
-                ),
-                onOk() { },
-            });
-        }
-    };
 
     return (
-        <>
-            <AuthorLink icon={<LinkOutlined />} label="Scopus Profile" onClick={handleScopusClick} />
-            <AuthorLink icon={<LinkOutlined />} label="DBLP Profile" onClick={handleDblpClick} isLoading={dblpAuthor.isFetching} isError={dblpAuthor.isError} resultsCount={dblpAuthor.data?.authors.length} />
-            <AuthorLink icon={<LinkOutlined />} label="Scholar Profile" onClick={handleScholarClick} isLoading={scholarAuthor.isFetching} isError={scholarAuthor.isError} resultsCount={scholarAuthor.data?.authors.length} />
-        </>
-    );
-};
-
-const AuthorLink: React.FC<{icon: React.ReactNode; label: string; onClick?: () => void, isLoading?: boolean, isError?: boolean, resultsCount?: number}> = 
-    ({ icon, label, onClick, isLoading, isError, resultsCount }) => {
-
-
-    const handleClick = () => {
-        if(isLoading || isError || resultsCount === 0) return;
-
-        if (onClick) {
-            onClick();
-        }
-    };
-
-    return (
-        <Flex gap={5} onClick={handleClick} style={{ alignItems: "center" }}>
-            {(!isLoading) && icon}
-            {isLoading && <Spin size='small' />}
-            {isError && <WarningOutlined />}
-            <Typography.Link disabled={isLoading || isError || resultsCount === 0}>{label}</Typography.Link>
-            {(resultsCount !== undefined) && <Typography.Text type="secondary">({resultsCount})</Typography.Text>}
+        <Flex style={{width: "100%", justifyContent: "space-around"}}>
+            <ScopusProfileRedirectButton author_firstname={author.given_name} author_lastname={author.surname} url={author.scopus_url} />
+            <DblpProfileRedirectButton authorName={authorName} />
+            <ScholarProfileRedirectButton authorName={authorName} />
         </Flex>
     );
-
 };

@@ -1,0 +1,7 @@
+.authorListItem {
+    cursor: pointer;
+}
+
+.authorListItem:hover {
+    background: #f5f5f5;
+}

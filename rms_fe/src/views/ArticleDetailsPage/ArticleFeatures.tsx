@@ -1,7 +1,10 @@
-import { Button, Form, Input, Typography, Empty, Flex, InputNumber } from 'antd';
+import { Button, Form, Input, Typography, Empty, Flex, InputNumber, List, Avatar } from 'antd';
 import { ExtractedPdfFeatures } from '../../types/api/article.ts';
 import { EditableTagsInput } from '../../components/forms/EditableTagsInput.tsx';
 import { SearchBody } from '../../types/api/search-engine.ts';
+import DblpProfileRedirectButton from './ProfileRedirectButtons/DblpProfileRedirectButton.tsx';
+import ScholarProfileRedirectButton from './ProfileRedirectButtons/ScholarProfileRedirectButton.tsx';
+import ScopusProfileRedirectButton from './ProfileRedirectButtons/ScopusProfileRedirectButton.tsx';
 
 export type ArticleFeaturesProps = {
     features?: ExtractedPdfFeatures;
@@ -17,6 +20,10 @@ export type IArticleFeaturesForm = {
     abstractKeywords: string[];
     count: number;
 };
+
+export interface AuthorProfileButtonProps {
+    authorName: string;
+}
 
 export const ArticleFeatures = (props: ArticleFeaturesProps) => {
     const [form] = Form.useForm<IArticleFeaturesForm>()
@@ -42,7 +49,7 @@ export const ArticleFeatures = (props: ArticleFeaturesProps) => {
                 title: values.name,
                 keywords: values.keywords,
                 abstractKeywords: values.abstractKeywords,
-                count: values.count,
+                count: values.count
             }
         );
     };
@@ -66,10 +73,34 @@ export const ArticleFeatures = (props: ArticleFeaturesProps) => {
                             <InputNumber min={1} max={25} />
                         </Form.Item>
 
+                        <List
+                            itemLayout="horizontal"
+                            dataSource={props.features.authors}
+                            renderItem={(author, index) => {
+                                const authorName = `${author.first_name} ${author.last_name}`;
+                                return (
+                                <List.Item>
+                                    <Flex gap={10} style={{ alignItems: "center", width: "100%" }}>
+                                        <div style={{ flex: 1 }}>
+                                            <Avatar src={`https://xsgames.co/randomusers/avatar.php?g=pixel&key=${index}`} />
+                                        </div>
+                                        <div style={{ flex: 10 }}>
+                                            <Flex style={{ justifyContent: "space-between", width: "100%" }}>
 
-                        {props.features.authors.map((author, index) => (
-                            <Typography.Paragraph key={index}>{author}</Typography.Paragraph>
-                        ))}
+                                                <Typography.Text strong >{authorName}</Typography.Text>
+
+                                                <Flex gap={10}>
+                                                    <ScopusProfileRedirectButton author_firstname={author.first_name} author_lastname={author.last_name}/>
+                                                    <DblpProfileRedirectButton authorName={authorName} />
+                                                    <ScholarProfileRedirectButton authorName={authorName}/>
+                                                </Flex>
+
+                                            </Flex>
+                                        </div>
+                                    </Flex>
+                                </List.Item>
+                            )}}
+                        />
                     </Flex>
                 </div>
 
