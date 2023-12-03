@@ -95,8 +95,8 @@ export const ArticleFeatures = (props: ArticleFeaturesProps) => {
                                                 <Avatar src={`https://xsgames.co/randomusers/avatar.php?g=pixel&key=${index}`} />
                                             </div>
                                             <div style={{ flex: 10 }}>
-                                                <Flex style={{ justifyContent: "space-between", width: "100%" }}>
-                                                    
+                                                <Flex style={{ justifyContent: "space-between", width: "100%"}}>
+                                                    <Flex vertical>
                                                     <Flex gap={5} align='center'>
                                                         <Typography.Text strong >{authorName}</Typography.Text>
                                                         {authorOrcids[authorName] && <Popover content={
@@ -104,6 +104,8 @@ export const ArticleFeatures = (props: ArticleFeaturesProps) => {
                                                         }>
                                                             <InfoCircleOutlined />
                                                         </Popover>}
+                                                    </Flex>
+                                                        <Typography.Text type='secondary'>{author.email}</Typography.Text>
                                                     </Flex>
 
                                                     <Flex gap={10}>

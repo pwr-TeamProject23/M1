@@ -30,6 +30,7 @@ export type ArticleWithCreator = Pretty<Omit<Article, "file_id" | "creator_id"> 
 export type Author = {
     first_name: string
     last_name: string
+    email?: string
 }
 
 export type ExtractedPdfFeatures = {

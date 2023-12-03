@@ -59,9 +59,8 @@ class PageDataExtractor:
         authors = self._extract_authors()
         emails = self.extract_emails()
 
-        for i, author in enumerate(authors):
-            if i < len(emails):
-                author.email = emails[i]
+        for author, email in zip(authors, emails, strict=False):
+            author.email = email
 
         return FirstPagePdfData(
             name=self._extract_name(),
