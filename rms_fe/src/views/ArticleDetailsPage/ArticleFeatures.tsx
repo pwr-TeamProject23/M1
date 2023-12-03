@@ -1,10 +1,12 @@
-import { Button, Form, Input, Typography, Empty, Flex, InputNumber, List, Avatar } from 'antd';
+import { Button, Form, Input, Typography, Empty, Flex, InputNumber, List, Avatar, Popover } from 'antd';
 import { ExtractedPdfFeatures } from '../../types/api/article.ts';
 import { EditableTagsInput } from '../../components/forms/EditableTagsInput.tsx';
 import { SearchBody } from '../../types/api/search-engine.ts';
 import DblpProfileRedirectButton from './ProfileRedirectButtons/DblpProfileRedirectButton.tsx';
 import ScholarProfileRedirectButton from './ProfileRedirectButtons/ScholarProfileRedirectButton.tsx';
 import ScopusProfileRedirectButton from './ProfileRedirectButtons/ScopusProfileRedirectButton.tsx';
+import { useState } from 'react';
+import { InfoCircleOutlined } from '@ant-design/icons';
 
 export type ArticleFeaturesProps = {
     features?: ExtractedPdfFeatures;
@@ -26,6 +28,7 @@ export interface AuthorProfileButtonProps {
 }
 
 export const ArticleFeatures = (props: ArticleFeaturesProps) => {
+    const [authorOrcids, setAuthorOrcids] = useState<{ [key: string]: string }>({});
     const [form] = Form.useForm<IArticleFeaturesForm>()
     const initialValues = {
         ...props.features,
@@ -41,6 +44,13 @@ export const ArticleFeatures = (props: ArticleFeaturesProps) => {
             </Empty>
         );
     }
+
+    const handleAuthorOrcid = (authorFirstName: string, authorLastName: string, orcid: string) => {
+        setAuthorOrcids(prevOrcids => ({
+            ...prevOrcids,
+            [`${authorFirstName} ${authorLastName}`]: orcid
+        }));
+    };
 
     const handleFormSubmit = (values: IArticleFeaturesForm) => {
 
@@ -79,27 +89,35 @@ export const ArticleFeatures = (props: ArticleFeaturesProps) => {
                             renderItem={(author, index) => {
                                 const authorName = `${author.first_name} ${author.last_name}`;
                                 return (
-                                <List.Item>
-                                    <Flex gap={10} style={{ alignItems: "center", width: "100%" }}>
-                                        <div style={{ flex: 1 }}>
-                                            <Avatar src={`https://xsgames.co/randomusers/avatar.php?g=pixel&key=${index}`} />
-                                        </div>
-                                        <div style={{ flex: 10 }}>
-                                            <Flex style={{ justifyContent: "space-between", width: "100%" }}>
+                                    <List.Item>
+                                        <Flex gap={10} style={{ alignItems: "center", width: "100%" }}>
+                                            <div style={{ flex: 1 }}>
+                                                <Avatar src={`https://xsgames.co/randomusers/avatar.php?g=pixel&key=${index}`} />
+                                            </div>
+                                            <div style={{ flex: 10 }}>
+                                                <Flex style={{ justifyContent: "space-between", width: "100%" }}>
+                                                    
+                                                    <Flex gap={5} align='center'>
+                                                        <Typography.Text strong >{authorName}</Typography.Text>
+                                                        {authorOrcids[authorName] && <Popover content={
+                                                            <Typography.Text type='secondary'>{`ORCID: ${authorOrcids[authorName]}`}</Typography.Text>
+                                                        }>
+                                                            <InfoCircleOutlined />
+                                                        </Popover>}
+                                                    </Flex>
 
-                                                <Typography.Text strong >{authorName}</Typography.Text>
+                                                    <Flex gap={10}>
+                                                        <ScopusProfileRedirectButton author_firstname={author.first_name} author_lastname={author.last_name} onOrcidUpdate={(orcid) => handleAuthorOrcid(author.first_name, author.last_name, orcid)} />
+                                                        <DblpProfileRedirectButton authorName={authorName} />
+                                                        <ScholarProfileRedirectButton authorName={authorName} />
+                                                    </Flex>
 
-                                                <Flex gap={10}>
-                                                    <ScopusProfileRedirectButton author_firstname={author.first_name} author_lastname={author.last_name}/>
-                                                    <DblpProfileRedirectButton authorName={authorName} />
-                                                    <ScholarProfileRedirectButton authorName={authorName}/>
                                                 </Flex>
-
-                                            </Flex>
-                                        </div>
-                                    </Flex>
-                                </List.Item>
-                            )}}
+                                            </div>
+                                        </Flex>
+                                    </List.Item>
+                                )
+                            }}
                         />
                     </Flex>
                 </div>

@@ -48,7 +48,7 @@ const DblpProfileRedirectButton = (props: DblpProfileRedirectButtonProps) => {
                                         </div>
                                         <div style={{ flex: 10 }}>
                                             <Flex style={{ justifyContent: "space-between", width: "100%" }} >
-                                                <Typography.Link strong>{props.authorName} ({index})</Typography.Link>
+                                                <Typography.Text strong>{props.authorName} ({index + 1})</Typography.Text>
                                             </Flex>
                                         </div>
                                     </Flex>
@@ -62,6 +62,8 @@ const DblpProfileRedirectButton = (props: DblpProfileRedirectButtonProps) => {
         }
     };
 
+    const isDisabled = authorsLength === 0 && !dblpAuthor.isError;
+
     return (
         <Tooltip title="Dblp profile">
             <Badge count={authorsLength && authorsLength > 1 ? authorsLength : ""} size='small'>
@@ -69,7 +71,8 @@ const DblpProfileRedirectButton = (props: DblpProfileRedirectButtonProps) => {
                     shape='circle'
                     loading={dblpAuthor.isFetching}
                     danger={dblpAuthor.isError}
-                    disabled={authorsLength === 0 && !dblpAuthor.isError}
+                    disabled={isDisabled}
+                    style={{ backgroundColor: isDisabled ? "#DDDDDD": "" }}
                     icon={<DblpIcon style={{ fontSize: '32px', width: "24 px", height: "24px" }} />}
                     onClick={() => {
                         if (dblpAuthor.isError) {

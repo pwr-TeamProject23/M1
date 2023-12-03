@@ -4,6 +4,7 @@ import Icon, { CustomIconComponentProps } from '@ant-design/icons/lib/components
 import "./ProfileRedirectButton.css"
 import { useQuery } from '@tanstack/react-query';
 import { getAuthorScopus } from '../../../clients/search-engine';
+import { useEffect } from 'react';
 
 const useScopusAuthor = (author_lastname: string, author_firstname: string) => {
     return useQuery({ enabled: false, queryKey: ["author_scopus", author_firstname, author_lastname], queryFn: () => getAuthorScopus(author_lastname, author_firstname), staleTime: 60 * 60 * 1000 })
@@ -13,6 +14,7 @@ interface ScopusProfileRedirectButtonProps {
     author_lastname: string;
     author_firstname: string;
     url?: string;
+    onOrcidUpdate?: (orcid: string) => void;
 }
 
 const ScopusProfileRedirectButton = (props: ScopusProfileRedirectButtonProps) => {
@@ -23,6 +25,12 @@ const ScopusProfileRedirectButton = (props: ScopusProfileRedirectButtonProps) =>
     if(!props.url && !scopusAuthor.data){
         scopusAuthor.refetch();
     }
+
+    useEffect(() => {
+        if(scopusAuthor.data?.authors.length === 1 && scopusAuthor.data.authors[0].orcid && props.onOrcidUpdate){
+            props.onOrcidUpdate(scopusAuthor.data.authors[0].orcid);
+        }
+    }, [scopusAuthor.data?.authors.length])
 
     const handleScopusClick = async () => {
 
@@ -55,8 +63,9 @@ const ScopusProfileRedirectButton = (props: ScopusProfileRedirectButtonProps) =>
                                             <Avatar src={`https://xsgames.co/randomusers/avatar.php?g=pixel&key=${index}`} />
                                         </div>
                                         <div style={{ flex: 10 }}>
-                                            <Flex style={{ justifyContent: "space-between", width: "100%" }} >
-                                                <Typography.Link strong>{props.author_firstname} {props.author_lastname} ({index})</Typography.Link>
+                                            <Flex style={{ justifyContent: "space-between", width: "100%", flexDirection: "column" }} >
+                                                <Typography.Text strong>{props.author_firstname} {props.author_lastname} ({index + 1})</Typography.Text>
+                                                {author.orcid && <Typography.Text type='secondary'>ORCID: {author.orcid}</Typography.Text>}
                                             </Flex>
                                         </div>
                                     </Flex>
@@ -76,6 +85,8 @@ const ScopusProfileRedirectButton = (props: ScopusProfileRedirectButtonProps) =>
     );
 
 
+    const isDisabled = authorsLength === 0 && !scopusAuthor.isError;
+
     return (
         <Tooltip title="Scopus profile">
             <Badge count={authorsLength && authorsLength > 1 ? authorsLength : ""} size='small'>
@@ -83,7 +94,8 @@ const ScopusProfileRedirectButton = (props: ScopusProfileRedirectButtonProps) =>
                     shape='circle'
                     loading={scopusAuthor.isFetching}
                     danger={scopusAuthor.isError}
-                    disabled={authorsLength === 0 && !scopusAuthor.isError}
+                    disabled={isDisabled}
+                    style={{ backgroundColor: isDisabled ? "#DDDDDD": "" }}
                     icon={<ScopusIcon style={{ fontSize: '32px', width: "24 px", height: "24px" }} />}
                     onClick={() => {
                         if (scopusAuthor.isError) {

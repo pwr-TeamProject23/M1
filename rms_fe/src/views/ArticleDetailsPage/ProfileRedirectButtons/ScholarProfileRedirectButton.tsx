@@ -48,7 +48,7 @@ const ScholarProfileRedirectButton = (props: ScholarProfileRedirectButtonProps) 
                                         <div style={{ flex: 10 }}>
                                             <Flex style={{ justifyContent: "space-between", width: "100%" }}>
 
-                                                <Typography.Text strong >{props.authorName}</Typography.Text>
+                                                <Typography.Text strong >{props.authorName} ({index + 1})</Typography.Text>
 
                                             </Flex>
                                         </div>
@@ -63,13 +63,16 @@ const ScholarProfileRedirectButton = (props: ScholarProfileRedirectButtonProps) 
         }
     };
 
+    const isDisabled = authorsLength === 0 && !scholarAuthor.isError;
+
     return (
         <Tooltip title="Scholar profile">
             <Badge count={authorsLength && authorsLength > 1 ? authorsLength : ""} size='small'>
                 <Button
                     shape='circle'
                     loading={scholarAuthor.isFetching}
-                    disabled={authorsLength === 0 && !scholarAuthor.isError}
+                    disabled={isDisabled}
+                    style={{ backgroundColor: isDisabled ? "#DDDDDD": "" }}
                     danger={scholarAuthor.isError}
                     icon={<ScholarIcon style={{ fontSize: '32px', width: "24 px", height: "24px" }} />}
                     onClick={() => {
