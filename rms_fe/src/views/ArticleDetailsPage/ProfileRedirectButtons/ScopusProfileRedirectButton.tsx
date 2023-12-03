@@ -27,8 +27,8 @@ const ScopusProfileRedirectButton = (props: ScopusProfileRedirectButtonProps) =>
     }
 
     useEffect(() => {
-        if(scopusAuthor.data?.authors.length === 1 && scopusAuthor.data.authors[0].orcid && props.onOrcidUpdate){
-            props.onOrcidUpdate(scopusAuthor.data.authors[0].orcid);
+        if(scopusAuthor.data?.authors.length === 1 && scopusAuthor.data.authors[0].orcid){
+            props.onOrcidUpdate?.(scopusAuthor.data.authors[0].orcid);
         }
     }, [scopusAuthor.data?.authors.length])
 
