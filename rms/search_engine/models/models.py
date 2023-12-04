@@ -52,6 +52,7 @@ class SearchBody(BaseModel):
     keywords: list[str] = []
     abstract_keywords: list[str] = []
     count: int = 3
+    sort_by: list[str] = ["-relevancy", "-citedby-count", "-pubyear"]
 
 
 class AuthorSearch(BaseModel):
