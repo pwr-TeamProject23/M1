@@ -88,13 +88,13 @@ class PageDataExtractor:
         for line in authors_section:
             if ';' in line or ',' in line and line.count(',') == 1 and ';' not in current_author:
                 if current_author:
-                    formatted_authors.append(current_author.strip())
+                    formatted_authors.append(current_author.strip().split(";")[0])
                 current_author = line
             else:
                 current_author += " " + line
 
         if current_author:
-            formatted_authors.append(current_author.strip())
+            formatted_authors.append(current_author.strip().split(";")[0])
 
         return [self._parse_singular_author(author) for author in formatted_authors]
 
