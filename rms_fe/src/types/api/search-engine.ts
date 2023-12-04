@@ -50,6 +50,7 @@ export type SearchBody = {
   keywords: string[] | undefined;
   abstractKeywords: string[] | undefined;
   count: number | undefined;
+  sort_by: string[] | undefined;
 };
 
 export type DblpAuthor = {

@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 
 class Affiliation(BaseModel):
@@ -52,7 +52,7 @@ class SearchBody(BaseModel):
     keywords: list[str] = []
     abstract_keywords: list[str] = []
     count: int = 3
-    sort_by: list[str] = Field(["-relevancy"], alias="sortBy")
+    sort_by: list[str] = ["-relevancy", "-citedby-count", "-pubyear"]
 
 
 class AuthorSearch(BaseModel):

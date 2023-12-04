@@ -2,10 +2,10 @@ import { useNavigate, useParams } from "react-router-dom"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { extractArticlePdfFeatures, singleArticle, updateArticle } from "../../clients/articles.ts"
 import { searchArticles } from "../../clients/search-engine.ts"
-import { Button, Flex, message, Space, Tag, Typography, Steps, Divider, FloatButton } from "antd"
+import { Button, Flex, message, Space, Tag, Typography, Steps, Divider, FloatButton, Skeleton } from "antd"
 import { EditableTextField } from "../../components/EditableTextField.tsx"
 import { ArticleCreator, ArticleUpdate } from "../../types/api/article.ts"
-import { EyeOutlined, LeftCircleOutlined } from "@ant-design/icons"
+import { EyeOutlined, LeftCircleOutlined, SearchOutlined } from "@ant-design/icons"
 import * as React from "react"
 import { ArticlePreviewModal } from "./ArticlePreviewModal.tsx"
 import { useState } from "react"
@@ -13,6 +13,7 @@ import { copyToClipboard } from "../../utils/copy.ts"
 import { ArticleFeatures } from "./ArticleFeatures.tsx"
 import { SearchBody, SearchResponse } from "../../types/api/search-engine.ts"
 import { ArticleRecommendations } from "./ArticleRecommendations.tsx"
+import { SortingOptionsSelect } from "../../components/forms/SortingOptionsSelect.tsx"
 
 const useArticle = (id: string | number) => {
     return useQuery({ queryKey: ["article", id], queryFn: () => singleArticle(id) })
@@ -66,6 +67,7 @@ export const ArticleDetailsPage = () => {
     const [pdfPreviewIsOpen, setPdfPreviewIsOpen] = useState(false)
     const [recommendations, setRecommendations] = useState<SearchResponse>()
     const [currentStep, setCurrentStep] = useState(0)
+    const [searchParameters, setSearchParameters] = useState<SearchBody>()
 
     const stepsRef = React.useRef<HTMLDivElement>(null)
 
@@ -84,6 +86,7 @@ export const ArticleDetailsPage = () => {
     const searchArticles = useSearchArticles()
 
     const handleGenerateRecommendations = (searchBody: SearchBody) => {
+        setSearchParameters(searchBody)
         searchArticles.mutate(searchBody, {
             onSuccess: (data) => {
                 setCurrentStep(Step.Recommendations)
@@ -91,6 +94,22 @@ export const ArticleDetailsPage = () => {
             },
         })
     }
+
+    const handleRecommendationsReload = () => {
+        if (!searchParameters) {
+            return
+        }
+        searchArticles.mutate(searchParameters, {
+            onSuccess: (data) => {
+                setRecommendations(data)
+            },
+        })
+    }
+
+    const handleSortingChange = (newSorting: string[]) => {
+        setSearchParameters({ ...searchParameters!, sort_by: newSorting })
+    }
+
     const handleStepChange = (current: number) => {
         setCurrentStep(current)
     }
@@ -116,7 +135,32 @@ export const ArticleDetailsPage = () => {
             title: "Recommendations",
             content: (
                 <div style={{ minHeight: "100vh" }}>
-                    <ArticleRecommendations recommendations={recommendations} />
+                    <Flex gap={5} style={{ marginTop: "10px" }}>
+                        <SortingOptionsSelect
+                            handleSortingChange={handleSortingChange}
+                            selectedLabels={searchParameters?.sort_by}
+                        />
+                        <Button
+                            type="primary"
+                            icon={<SearchOutlined />}
+                            onClick={handleRecommendationsReload}
+                            loading={searchArticles.isPending}
+                        >
+                            Reload
+                        </Button>
+                    </Flex>
+                    {searchArticles.isPending ? (
+                        Array(searchParameters?.count)
+                            .fill(null)
+                            .map((n) => (
+                                <Flex vertical key={n} gap={10} style={{ marginTop: "20px" }}>
+                                    <Skeleton active />
+                                    <Divider />
+                                </Flex>
+                            ))
+                    ) : (
+                        <ArticleRecommendations recommendations={recommendations} />
+                    )}
                 </div>
             ),
         },
