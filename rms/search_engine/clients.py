@@ -57,12 +57,13 @@ class ScopusApi(ScopusClient):
         ]
 
         combined_criteria = " AND ".join(filter(None, criteria))
+        sorting_criteria = self._build_sorting_criteria(query.sort_by)
 
         params = {
             "query": combined_criteria,
             "count": query.count,
             "view": "COMPLETE",
-            "sort": "-relevancy,-citedby-count,-coverDate",
+            "sort": sorting_criteria,
         }
 
         return params
@@ -88,6 +89,12 @@ class ScopusApi(ScopusClient):
             return ""
         abstract_keywords_criteria = " OR ".join([f'ABS("{keyword}")' for keyword in abstract_keywords])
         return f"({abstract_keywords_criteria})"
+
+    @staticmethod
+    def _build_sorting_criteria(sorting: list[str] | None) -> str:
+        if not sorting:
+            return ""
+        return ",".join(sorting)
 
 
 class DblpClient(ABC):
