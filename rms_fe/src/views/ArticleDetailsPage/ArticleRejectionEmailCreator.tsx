@@ -105,8 +105,8 @@ const emailGenerator = (
     )
         .replace("{recipient}", recipient)
         .replace("{title}", articleName)
-        .replace("{eisei}", article_eisej)
+        .replace("{eisej}", article_eisej)
         .replace("{rejection_reasons}", mappedRejectionReasons.join("- "))
-        .replace("{user}", `${user?.first_name} ${user?.first_name}`)
+        .replace("{user}", `${user?.first_name} ${user?.last_name}`)
         .replace("{user_email}", user?.email || "")
 }
