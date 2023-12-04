@@ -39,7 +39,7 @@ def validate_credentials(db: Session, email: str, password: str) -> tuple[UserOr
 
 
 def invalidate_cookie(db: Session, auth_cookie_value: str) -> bool:
-    auth_cookie = UserCookieManager.find_by_value(auth_cookie_value)
+    auth_cookie = UserCookieManager.find_by_value(db, auth_cookie_value)
     if not auth_cookie:
         return False
 
