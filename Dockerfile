@@ -18,6 +18,8 @@ EXPOSE 8000
 
 FROM base as prod
 
+RUN python rms/file_processing/services/keyword_extractor.py
+
 CMD ["bash", "scripts/launch_prod.sh"]
 
 

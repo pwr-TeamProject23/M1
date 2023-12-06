@@ -7,7 +7,7 @@ from pypdf import PdfReader
 
 from rms.file_processing.clients import MinioClient
 from rms.file_processing.models import FileOrm
-from rms.file_processing.services.models import PdfArticleData, FirstPagePdfData, Author
+from rms.file_processing.services.models import Author
 
 from rms.file_processing.services.models import PdfArticleData, FirstPagePdfData
 from rms.file_processing.services.utils import on_error
@@ -101,7 +101,7 @@ class PageDataExtractor:
         current_author = ""
 
         for line in authors_section:
-            if ';' in line or ',' in line and line.count(',') == 1 and ';' not in current_author:
+            if ";" in line or "," in line and line.count(",") == 1 and ";" not in current_author:
                 if current_author:
                     formatted_authors.append(current_author.strip().split(";")[0])
                 current_author = line
@@ -128,12 +128,9 @@ class PageDataExtractor:
     @on_error(return_value=Author(first_name="error", last_name="processing"))
     def _parse_singular_author(self, author: str) -> Author:
         author_parts = author.split(",")
-        return Author(
-            first_name=author_parts[1],
-            last_name=author_parts[0]
-        )
+        return Author(first_name=author_parts[1], last_name=author_parts[0])
 
     @on_error(return_value=[])
     def extract_emails(self) -> list[str]:
-        email_regex = re.compile(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b')
+        email_regex = re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b")
         return email_regex.findall(self.second_page_content)
