@@ -10,6 +10,7 @@ class Settings(BaseSettings):
 
     scopus_api_key: str
     scopus_search_endpoint: str
+    scopus_author_endpoint: str
     allowed_origins: str
     dblp_search_endpoint: str
 

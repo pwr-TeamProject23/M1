@@ -2,10 +2,10 @@ import { useNavigate, useParams } from "react-router-dom"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { extractArticlePdfFeatures, singleArticle, updateArticle } from "../../clients/articles.ts"
 import { searchArticles } from "../../clients/search-engine.ts"
-import { Button, Flex, message, Space, Tag, Typography, Steps, Divider, FloatButton } from "antd"
+import { Button, Flex, message, Space, Tag, Typography, Steps, Divider, FloatButton, Skeleton } from "antd"
 import { EditableTextField } from "../../components/EditableTextField.tsx"
 import { ArticleCreator, ArticleUpdate } from "../../types/api/article.ts"
-import { EyeOutlined, LeftCircleOutlined } from "@ant-design/icons"
+import { EyeOutlined, LeftCircleOutlined, SearchOutlined, MailOutlined } from "@ant-design/icons"
 import * as React from "react"
 import { ArticlePreviewModal } from "./ArticlePreviewModal.tsx"
 import { useState } from "react"
@@ -13,6 +13,9 @@ import { copyToClipboard } from "../../utils/copy.ts"
 import { ArticleFeatures } from "./ArticleFeatures.tsx"
 import { SearchBody, SearchResponse } from "../../types/api/search-engine.ts"
 import { ArticleRecommendations } from "./ArticleRecommendations.tsx"
+import { useSearchParamsState } from "../../hooks/useSearchParamsState.ts"
+import { ArticleRejectionEmailCreatorDialog } from "./ArticleRejectionEmailCreator.tsx"
+import { SortingOptionsSelect } from "../../components/forms/SortingOptionsSelect.tsx"
 
 const useArticle = (id: string | number) => {
     return useQuery({ queryKey: ["article", id], queryFn: () => singleArticle(id) })
@@ -66,6 +69,11 @@ export const ArticleDetailsPage = () => {
     const [pdfPreviewIsOpen, setPdfPreviewIsOpen] = useState(false)
     const [recommendations, setRecommendations] = useState<SearchResponse>()
     const [currentStep, setCurrentStep] = useState(0)
+    const [searchParameters, setSearchParameters] = useState<SearchBody>()
+    const [isRejectionEmailDialogOpen, setIsRejectionEmailDialogOpen] = useSearchParamsState(
+        "showRejectionEmailDialog",
+        "false"
+    )
 
     const stepsRef = React.useRef<HTMLDivElement>(null)
 
@@ -84,6 +92,7 @@ export const ArticleDetailsPage = () => {
     const searchArticles = useSearchArticles()
 
     const handleGenerateRecommendations = (searchBody: SearchBody) => {
+        setSearchParameters(searchBody)
         searchArticles.mutate(searchBody, {
             onSuccess: (data) => {
                 setCurrentStep(Step.Recommendations)
@@ -91,6 +100,22 @@ export const ArticleDetailsPage = () => {
             },
         })
     }
+
+    const handleRecommendationsReload = () => {
+        if (!searchParameters) {
+            return
+        }
+        searchArticles.mutate(searchParameters, {
+            onSuccess: (data) => {
+                setRecommendations(data)
+            },
+        })
+    }
+
+    const handleSortingChange = (newSorting: string[]) => {
+        setSearchParameters({ ...searchParameters!, sort_by: newSorting })
+    }
+
     const handleStepChange = (current: number) => {
         setCurrentStep(current)
     }
@@ -116,7 +141,32 @@ export const ArticleDetailsPage = () => {
             title: "Recommendations",
             content: (
                 <div style={{ minHeight: "100vh" }}>
-                    <ArticleRecommendations recommendations={recommendations} />
+                    <Flex gap={5} style={{ marginTop: "10px" }}>
+                        <SortingOptionsSelect
+                            handleSortingChange={handleSortingChange}
+                            selectedLabels={searchParameters?.sort_by}
+                        />
+                        <Button
+                            type="primary"
+                            icon={<SearchOutlined />}
+                            onClick={handleRecommendationsReload}
+                            loading={searchArticles.isPending}
+                        >
+                            Reload
+                        </Button>
+                    </Flex>
+                    {searchArticles.isPending ? (
+                        Array(searchParameters?.count)
+                            .fill(null)
+                            .map((n) => (
+                                <Flex vertical key={n} gap={10} style={{ marginTop: "20px" }}>
+                                    <Skeleton active />
+                                    <Divider />
+                                </Flex>
+                            ))
+                    ) : (
+                        <ArticleRecommendations recommendations={recommendations} />
+                    )}
                 </div>
             ),
         },
@@ -124,6 +174,11 @@ export const ArticleDetailsPage = () => {
 
     return (
         <div style={{ padding: "2em 4em" }}>
+            <ArticleRejectionEmailCreatorDialog
+                isOpen={isRejectionEmailDialogOpen === "true"}
+                article={article.data}
+                onClose={() => setIsRejectionEmailDialogOpen("false")}
+            />
             <Button
                 size="large"
                 style={{ marginBottom: "1em" }}
@@ -135,9 +190,14 @@ export const ArticleDetailsPage = () => {
 
             <Flex justify="space-between">
                 <Typography.Title>{article.data.name}</Typography.Title>
-                <Button icon={<EyeOutlined />} onClick={() => setPdfPreviewIsOpen(true)}>
-                    Preview pdf
-                </Button>
+                <Flex gap={12}>
+                    <Button icon={<MailOutlined />} onClick={() => setIsRejectionEmailDialogOpen("true")}>
+                        Compose rejection email
+                    </Button>
+                    <Button icon={<EyeOutlined />} onClick={() => setPdfPreviewIsOpen(true)}>
+                        Preview pdf
+                    </Button>
+                </Flex>
             </Flex>
 
             <Typography.Paragraph>

@@ -1,9 +1,13 @@
 import React from 'react';
 import { List, Avatar, Popover, Flex, Empty, Typography, Space, Tooltip } from 'antd';
 import { Author, SearchResponse } from '../../types/api/search-engine';
-import { CalendarOutlined, EditOutlined, LinkOutlined } from '@ant-design/icons';
+import { CalendarOutlined, EditOutlined } from '@ant-design/icons';
 import Icon, { CustomIconComponentProps } from '@ant-design/icons/lib/components/Icon';
 import "./ArticleRecommendations.css"
+import { getInitials } from '../../utils/search-engine.ts';
+import DblpProfileRedirectButton from './ProfileRedirectButtons/DblpProfileRedirectButton.tsx';
+import ScopusProfileRedirectButton from './ProfileRedirectButtons/ScopusProfileRedirectButton.tsx';
+import ScholarProfileRedirectButton from './ProfileRedirectButtons/ScholarProfileRedirectButton.tsx';
 
 
 export type ArticleRecommendationsProps = {
@@ -23,7 +27,7 @@ export const ArticleRecommendations: React.FC<ArticleRecommendationsProps> = ({ 
             renderItem={item => (
                 <List.Item>
 
-                    <Flex vertical>
+                    <Flex vertical style={{ width: "100%" }}>
                         <Flex>
 
                             <Flex vertical flex={7}>
@@ -40,16 +44,16 @@ export const ArticleRecommendations: React.FC<ArticleRecommendationsProps> = ({ 
                                 </Typography.Paragraph>
                             </Flex>
 
-                            <Flex vertical flex={1} gap={5} style={{alignItems: "flex-end"}}>
+                            <Flex vertical flex={1} gap={5} style={{ alignItems: "flex-end" }}>
                                 <Tooltip title="Cover date">
-                                    <Flex gap={5} style={{width: "fit-content"}}>
+                                    <Flex gap={5} style={{ width: "fit-content" }}>
                                         {item.cover_date}
                                         <CalendarOutlined />
                                     </Flex>
                                 </Tooltip>
 
                                 <Tooltip title="Cited by count">
-                                    <Flex gap={5} style={{width: "fit-content"}}>
+                                    <Flex gap={5} style={{ width: "fit-content" }}>
                                         {item.cited_by_count}
                                         <EditOutlined />
                                     </Flex>
@@ -92,7 +96,7 @@ const AuthorPopover: React.FC<{ author: Author }> = ({ author }) => {
     const initials = getInitials(author.name);
 
     const popoverContent = (
-        <Flex vertical>
+        <Flex vertical gap={15}>
             <Flex align='center' gap={10}>
                 <Avatar style={{ backgroundColor: '#87d068' }}>{initials}</Avatar>
                 <b>{author.given_name} {author.surname}</b>
@@ -108,26 +112,18 @@ const AuthorPopover: React.FC<{ author: Author }> = ({ author }) => {
     );
 };
 
-const AuthorLinks: React.FC<{ author: Author }> = ({ author }) => (
-    <>
-        <AuthorLink icon={<LinkOutlined />} url={author.scopus_url} label="Scopus Profile" />
-        <AuthorLink icon={<LinkOutlined />} url={"#"} label="DBLP Profile" />
-        <AuthorLink icon={<LinkOutlined />} url={"#"} label="Scolar Profile" />
-    </>
-);
 
-const AuthorLink: React.FC<{ icon: React.ReactNode; url?: string; label: string }> = ({ icon, url, label }) => {
-    if (!url) return null;
+
+
+const AuthorLinks: React.FC<{ author: Author }> = ({ author }) => {
+
+    const authorName = author.given_name + " " + author.surname;
 
     return (
-        <Flex gap={5}>
-            {icon}
-            <a href={url} target="_blank" rel="noopener noreferrer">{label}</a>
+        <Flex style={{width: "100%", justifyContent: "space-around"}}>
+            <ScopusProfileRedirectButton author_firstname={author.given_name} author_lastname={author.surname} url={author.scopus_url} />
+            <DblpProfileRedirectButton authorName={authorName} />
+            <ScholarProfileRedirectButton authorName={authorName} />
         </Flex>
     );
-};
-
-const getInitials = (name: string | undefined) => {
-    if (!name) return '';
-    return name.split(' ').map(n => n[0]).join('');
 };

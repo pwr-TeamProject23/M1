@@ -52,3 +52,19 @@ class SearchBody(BaseModel):
     keywords: list[str] = []
     abstract_keywords: list[str] = []
     count: int = 3
+    sort_by: list[str] = ["-relevancy", "-citedby-count", "-pubyear"]
+
+
+class AuthorSearch(BaseModel):
+    scopus_id: str | None
+    eid: str | None
+    orcid: str | None
+    surname: str | None
+    given_name: str | None
+    initials: str | None
+    document_count: str | None
+    scopus_url: str | None
+
+
+class ScopusAuthorResponse(BaseModel):
+    authors: list[AuthorSearch] = []

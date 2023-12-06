@@ -1,5 +1,5 @@
 import pytest
-from rms.search_engine.clients import ScopusArticleSearchApi
+from rms.search_engine.clients import ScopusApi
 from rms.search_engine.models import SearchBody
 
 
@@ -12,7 +12,7 @@ from rms.search_engine.models import SearchBody
                 "query": '(TITLE("test"))',
                 "count": 3,
                 "view": "COMPLETE",
-                "sort": "-relevancy,-citedby-count,-coverDate",
+                "sort": "-relevancy,-citedby-count,-pubyear",
             },
         ),
         (
@@ -21,7 +21,7 @@ from rms.search_engine.models import SearchBody
                 "query": '(TITLE("test")) AND (KEY("key1") OR KEY("key2"))',
                 "count": 3,
                 "view": "COMPLETE",
-                "sort": "-relevancy,-citedby-count,-coverDate",
+                "sort": "-relevancy,-citedby-count,-pubyear",
             },
         ),
         (
@@ -30,7 +30,7 @@ from rms.search_engine.models import SearchBody
                 "query": '(TITLE("test")) AND (ABS("word1") OR ABS("word2"))',
                 "count": 3,
                 "view": "COMPLETE",
-                "sort": "-relevancy,-citedby-count,-coverDate",
+                "sort": "-relevancy,-citedby-count,-pubyear",
             },
         ),
         (
@@ -39,13 +39,13 @@ from rms.search_engine.models import SearchBody
                 "query": '(TITLE("test")) AND (KEY("key1") OR KEY("key2")) AND (ABS("word1") OR ABS("word2"))',
                 "count": 3,
                 "view": "COMPLETE",
-                "sort": "-relevancy,-citedby-count,-coverDate",
+                "sort": "-relevancy,-citedby-count,-pubyear",
             },
         ),
     ),
 )
 def test_scopus_client_params_builder(test_input, expected):
-    client = ScopusArticleSearchApi()
+    client = ScopusApi()
     assert client.build_params(test_input) == expected
 
 
@@ -59,7 +59,7 @@ def test_scopus_client_params_builder(test_input, expected):
     ],
 )
 def test_title_stop_words_removal(title, expected_query_part):
-    client = ScopusArticleSearchApi()
+    client = ScopusApi()
     search_body = SearchBody(title=title)
     params = client.build_params(search_body)
 

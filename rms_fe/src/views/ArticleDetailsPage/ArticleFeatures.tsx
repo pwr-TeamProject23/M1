@@ -1,28 +1,40 @@
-import { Button, Form, Input, Typography, Empty, Flex, InputNumber } from 'antd';
+import { Button, Form, Input, Typography, Empty, Flex, InputNumber, List, Avatar, Popover } from 'antd';
 import { ExtractedPdfFeatures } from '../../types/api/article.ts';
 import { EditableTagsInput } from '../../components/forms/EditableTagsInput.tsx';
 import { SearchBody } from '../../types/api/search-engine.ts';
+import DblpProfileRedirectButton from './ProfileRedirectButtons/DblpProfileRedirectButton.tsx';
+import ScholarProfileRedirectButton from './ProfileRedirectButtons/ScholarProfileRedirectButton.tsx';
+import ScopusProfileRedirectButton from './ProfileRedirectButtons/ScopusProfileRedirectButton.tsx';
+import { SortingOptionsSelect } from "../../components/forms/SortingOptionsSelect.tsx"
+import { useState } from 'react';
+import { InfoCircleOutlined } from '@ant-design/icons';
 
 export type ArticleFeaturesProps = {
-    features?: ExtractedPdfFeatures;
-    onFetch: () => void;
-    isLoadingFeatures: boolean;
-    isLoadingArticles: boolean;
-    onGenerateRecommendations: (searchBody: SearchBody) => void;
-};
+    features?: ExtractedPdfFeatures
+    onFetch: () => void
+    isLoadingFeatures: boolean
+    isLoadingArticles: boolean
+    onGenerateRecommendations: (searchBody: SearchBody) => void
+}
 
 export type IArticleFeaturesForm = {
-    keywords: string[];
-    name: string;
-    abstractKeywords: string[];
-    count: number;
-};
+    keywords: string[]
+    name: string
+    abstractKeywords: string[]
+    count: number
+    sort_by: string[]
+}
+
+export interface AuthorProfileButtonProps {
+    authorName: string
+}
 
 export const ArticleFeatures = (props: ArticleFeaturesProps) => {
+    const [authorOrcids, setAuthorOrcids] = useState<{ [key: string]: string }>({});
     const [form] = Form.useForm<IArticleFeaturesForm>()
     const initialValues = {
         ...props.features,
-        count: 3
+        count: 10,
     }
 
     if (!props.features) {
@@ -32,48 +44,88 @@ export const ArticleFeatures = (props: ArticleFeaturesProps) => {
                     Process file
                 </Button>
             </Empty>
-        );
+        )
     }
 
-    const handleFormSubmit = (values: IArticleFeaturesForm) => {
-
-        props.onGenerateRecommendations(
-            {
-                title: values.name,
-                keywords: values.keywords,
-                abstractKeywords: values.abstractKeywords,
-                count: values.count,
-            }
-        );
+    const handleAuthorOrcid = (authorFirstName: string, authorLastName: string, orcid: string) => {
+        setAuthorOrcids(prevOrcids => ({
+            ...prevOrcids,
+            [`${authorFirstName} ${authorLastName}`]: orcid
+        }));
     };
 
-    return (
-        <Form form={form} initialValues={initialValues} onFinish={handleFormSubmit}>
-            <Flex style={{ marginTop: "10px" }}>
+    const handleFormSubmit = (values: IArticleFeaturesForm) => {
+        props.onGenerateRecommendations({
+            title: values.name,
+            keywords: values.keywords,
+            abstractKeywords: values.abstractKeywords,
+            count: values.count,
+            sort_by: values.sort_by,
+        })
+    }
 
+    return (
+        <Form form={form} initialValues={initialValues} onFinish={handleFormSubmit} labelCol={{ span: 24 }}>
+            <Flex style={{ marginTop: "10px", gap: "30px" }}>
                 <div style={{ flex: 1 }}>
                     <Flex vertical gap={8}>
-
-                        <Form.Item name="keywords" label="Keywords">
+                        <Form.Item name="keywords" label="Keywords::">
                             <EditableTagsInput />
                         </Form.Item>
 
-                        <Form.Item name="name" label="Document Name">
+                        <Form.Item name="name" label="Document Name::">
                             <Input />
                         </Form.Item>
 
-                        <Form.Item name="count" label="Number of Recommendations (1-25)">
-                            <InputNumber min={1} max={25} />
-                        </Form.Item>
+                        <List
+                            itemLayout="horizontal"
+                            dataSource={props.features.authors}
+                            renderItem={(author, index) => {
+                                const authorName = `${author.first_name} ${author.last_name}`
+                                return (
+                                    <List.Item>
+                                        <Flex gap={10} style={{ alignItems: "center", width: "100%" }}>
+                                            <div style={{ flex: 1 }}>
+                                                <Avatar src={`https://xsgames.co/randomusers/avatar.php?g=pixel&key=${index}`} />
+                                            </div>
+                                            <div style={{ flex: 10 }}>
+                                                <Flex style={{ justifyContent: "space-between", width: "100%"}}>
+                                                    <Flex vertical>
+                                                    <Flex gap={5} align='center'>
+                                                        <Typography.Text strong >{authorName}</Typography.Text>
+                                                        {authorOrcids[authorName] && <Popover content={
+                                                            <Typography.Text type='secondary'>{`ORCID: ${authorOrcids[authorName]}`}</Typography.Text>
+                                                        }>
+                                                            <InfoCircleOutlined />
+                                                        </Popover>}
+                                                    </Flex>
+                                                        <Typography.Text type='secondary'>{author.email}</Typography.Text>
+                                                    </Flex>
 
-
-                        {props.features.authors.map((author, index) => (
-                            <Typography.Paragraph key={index}>{author}</Typography.Paragraph>
-                        ))}
+                                                    <Flex gap={10}>
+                                                        <ScopusProfileRedirectButton author_firstname={author.first_name} author_lastname={author.last_name} onOrcidUpdate={(orcid) => handleAuthorOrcid(author.first_name, author.last_name, orcid)} />
+                                                        <DblpProfileRedirectButton authorName={authorName} />
+                                                        <ScholarProfileRedirectButton authorName={authorName} />
+                                                    </Flex>
+                                                </Flex>
+                                            </div>
+                                        </Flex>
+                                    </List.Item>
+                                )
+                            }}
+                        />
                     </Flex>
                 </div>
 
                 <div style={{ flex: 1 }}>
+                    <Form.Item name="sort_by" label="Sort By::">
+                        <SortingOptionsSelect />
+                    </Form.Item>
+
+                    <Form.Item name="count" label="Number of Recommendations (1-25)::">
+                        <InputNumber min={1} max={25} />
+                    </Form.Item>
+
                     <Empty description="There are no recommendations yet">
                         <Form.Item>
                             <Button type="primary" htmlType="submit" loading={props.isLoadingArticles}>
@@ -84,5 +136,5 @@ export const ArticleFeatures = (props: ArticleFeaturesProps) => {
                 </div>
             </Flex>
         </Form>
-    );
-};
+    )
+}
