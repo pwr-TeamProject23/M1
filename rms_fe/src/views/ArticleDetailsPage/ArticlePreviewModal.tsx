@@ -8,6 +8,8 @@ export type ArticlePreviewModalProps = {
 }
 
 export function ArticlePreviewModal(props: ArticlePreviewModalProps) {
+    const path = `${import.meta.env.VITE_APP_BACKEND_URL}files/get/${props.article.file.path}`
+
     return (
         <Modal
             open={props.isOpen}
@@ -17,7 +19,7 @@ export function ArticlePreviewModal(props: ArticlePreviewModalProps) {
             footer={[]}
             width="90vw"
         >
-            <object data={props.article.file.path} type="application/json" style={{ width: "100%", height: "80vh" }}>
+            <object data={path} type="application/json" style={{ width: "100%", height: "80vh" }}>
                 <Empty description="There was an error loading the pdf file" />
             </object>
         </Modal>

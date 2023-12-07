@@ -28,3 +28,9 @@ async def upload_to_storage(db: Session, file: UploadFile, file_name: str) -> Fi
         message=f"File '{file_name}' was successfully uploaded.",
         file_path=file_path,
     )
+
+
+async def download_file_from_storage(file_id: str) -> bytes:
+    blob_client = MinioClient()
+
+    return await blob_client.download(file_id)
