@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Form, Input, Button, Typography, message, Flex } from "antd"
 import { UserOutlined, LockOutlined } from "@ant-design/icons"
 import { NavigateFunction, useNavigate } from "react-router-dom"
@@ -6,6 +6,7 @@ import { useMutation } from "@tanstack/react-query"
 import { login } from "../../clients/auth.ts"
 import { LoginCredentials } from "../../types/api/auth.ts"
 import axios from "axios"
+import { useAuthStore } from "../../state/authState.ts"
 
 const useLogin = (navigate: NavigateFunction) => {
     return useMutation({
@@ -34,6 +35,14 @@ const LoginPage = () => {
     const navigate = useNavigate()
 
     const loginMutation = useLogin(navigate)
+
+    const userStore = useAuthStore()
+
+    useEffect(() => {
+        userStore.isLoggedIn().then(() => {
+            navigate("/app/articles")
+        })
+    }, [])
 
     return (
         <Flex vertical align="center" justify="center" style={{ height: "100vh" }}>
