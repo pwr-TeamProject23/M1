@@ -12,8 +12,18 @@ from rms.search_engine import views as search_engine_views
 
 MinioClient().try_create_bucket("articles")
 
-app = FastAPI()
+
 settings = Settings()
+
+if settings.use_keyword_extraction_model:
+    print("Downloading the keyword extractor model, this will take some time, brace yourself")
+    # Download the keyword extraction model
+    import rms.file_processing.services.keyword_extractor  # noqa
+else:
+    print("Skipping keyword extractor model initialization")
+
+app = FastAPI()
+
 
 app.add_middleware(
     CORSMiddleware,
