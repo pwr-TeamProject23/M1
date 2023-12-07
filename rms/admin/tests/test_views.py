@@ -15,24 +15,24 @@ def test_user(db) -> UserOrm:
     )
 
 
-def test_user_listing(client, db, test_user):
-    response = client.get("/admin/users")
+def test_user_listing(authenticated_client, db, test_user):
+    response = authenticated_client.get("/admin/users")
     data = response.json()
 
     assert response.status_code == 200
     assert isinstance(data, list)
-    assert len(data) == 1
+    assert len(data) == 2
 
 
-def test_user_details_raises_when_not_found(client):
-    response = client.get("/admin/users/69")
+def test_user_details_raises_when_not_found(authenticated_client):
+    response = authenticated_client.get("/admin/users/69")
 
     assert response.status_code == 404
     assert response.json()["detail"] == "Not Found"
 
 
-def test_user_details_happy_path(client, db, test_user):
-    response = client.get(f"/admin/users/{test_user.id}")
+def test_user_details_happy_path(authenticated_client, db, test_user):
+    response = authenticated_client.get(f"/admin/users/{test_user.id}")
     data = response.json()
 
     assert response.status_code == 200
@@ -41,7 +41,7 @@ def test_user_details_happy_path(client, db, test_user):
     assert data["permissions"] == []
 
 
-def test_user_details_displays_correct_groups(client, db, test_user):
+def test_user_details_displays_correct_groups(authenticated_client, db, test_user):
     p = PermissionOrm(code="can_do_something", readable_code="Can do something")
     p = PermissionManager.create(db, p)
 
@@ -53,7 +53,7 @@ def test_user_details_displays_correct_groups(client, db, test_user):
     test_user.permissions.append(p)
     test_user = UserManager.create(db, test_user)
 
-    response = client.get(f"/admin/users/{test_user.id}")
+    response = authenticated_client.get(f"/admin/users/{test_user.id}")
     data = response.json()
 
     assert response.status_code == 200
@@ -62,17 +62,17 @@ def test_user_details_displays_correct_groups(client, db, test_user):
     assert len(data["permissions"]) == 1
 
 
-def test_user_update__invalid_id(client):
-    response = client.patch("/admin/users/69", json={})
+def test_user_update__invalid_id(authenticated_client):
+    response = authenticated_client.patch("/admin/users/69", json={})
 
     assert response.status_code == 404
     assert response.json()["detail"] == "Not Found"
 
 
-def test_user_update_flat_fields(client, db, test_user):
+def test_user_update_flat_fields(authenticated_client, db, test_user):
     payload = {"first_name": "Steve", "last_name": "Mielony", "email": "xd@xd.com"}
 
-    response = client.patch(f"/admin/users/{test_user.id}", json=payload)
+    response = authenticated_client.patch(f"/admin/users/{test_user.id}", json=payload)
     data = response.json()
 
     assert response.status_code == 200
@@ -81,7 +81,7 @@ def test_user_update_flat_fields(client, db, test_user):
     assert data["email"] == payload["email"]
 
 
-def test_groups_update(client, db, test_user):
+def test_groups_update(authenticated_client, db, test_user):
     p = PermissionOrm(code="can_do_something", readable_code="Can do something")
     p = PermissionManager.create(db, p)
 
@@ -98,7 +98,7 @@ def test_groups_update(client, db, test_user):
 
     payload = {"groups": [g.id]}
 
-    response = client.patch(f"/admin/users/{test_user.id}", json=payload)
+    response = authenticated_client.patch(f"/admin/users/{test_user.id}", json=payload)
     data = response.json()
 
     assert response.status_code == 200
