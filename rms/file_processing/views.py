@@ -2,8 +2,10 @@ from fastapi import UploadFile, HTTPException, APIRouter, Depends
 from datetime import datetime
 
 from sqlalchemy.orm import Session
+from starlette.responses import Response
 
-from rms.file_processing.services import upload_to_storage
+from rms.auth.dependencies import get_current_user
+from rms.file_processing.services import upload_to_storage, download_file_from_storage
 from rms.file_processing.services import FileUploadResult
 from rms.utils.postgres import get_db
 
@@ -19,3 +21,10 @@ async def upload_file(file: UploadFile, db: Session = Depends(get_db)) -> FileUp
     name_with_timestamp = f"{timestamp}_{file.filename}"
 
     return await upload_to_storage(db, file, name_with_timestamp)
+
+
+@router.get("/get/{file_id}")
+async def download_file(file_id: str, user=Depends(get_current_user)):
+    file_bytes = await download_file_from_storage(file_id)
+
+    return Response(file_bytes, media_type="application/pdf")
