@@ -208,6 +208,7 @@ export const ArticleDetailsPage = () => {
             <ArticleRejectionEmailCreatorDialog
                 isOpen={isRejectionEmailDialogOpen === "true"}
                 article={article.data}
+                eisej_id={articleFeatures.data?.eisej_id}
                 onClose={() => setIsRejectionEmailDialogOpen("false")}
             />
             <Button
@@ -245,7 +246,7 @@ export const ArticleDetailsPage = () => {
                 {articleFeatures.data?.eisej_id && (
                     <Tag
                         style={{ userSelect: "none", cursor: "pointer" }}
-                        onClick={() => copyToClipboard("20231016103951")}
+                        onClick={() => copyToClipboard(articleFeatures.data.eisej_id)}
                     >
                         {articleFeatures.data?.eisej_id}
                     </Tag>

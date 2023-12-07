@@ -4,10 +4,12 @@ import { useAuthStore } from "../../state/authState.ts"
 import { rejectionReasonMap, rejectionReasons } from "./rejectionEmailGenerator.ts"
 import { ArticleWithDetails } from "../../types/api/article.ts"
 import { CopyOutlined } from "@ant-design/icons"
+import { useEffect } from "react"
 
 export type ArticleRejectionEmailCreatorDialogProps = {
     isOpen: boolean
     article?: ArticleWithDetails
+    eisej_id?: string
     onClose: () => void
 }
 
@@ -20,14 +22,15 @@ export const ArticleRejectionEmailCreatorDialog = (props: ArticleRejectionEmailC
             onOk={props.onClose}
             onCancel={props.onClose}
         >
-            <ArticleRejectionEmailCreator article={props.article} />
+            <ArticleRejectionEmailCreator article={props.article} eisej_id={props.eisej_id} />
         </Modal>
     )
 }
 
-const ArticleRejectionEmailCreator = (props: { article?: ArticleWithDetails }) => {
+const ArticleRejectionEmailCreator = (props: { article?: ArticleWithDetails, eisej_id?: string }) => {
     const user = useAuthStore((store) => store.user)
     const [form] = Form.useForm()
+
 
     const recipient = Form.useWatch("recipient", form)
     const article_name = Form.useWatch("article_title", form)
@@ -36,15 +39,21 @@ const ArticleRejectionEmailCreator = (props: { article?: ArticleWithDetails }) =
 
     const email = emailGenerator(recipient, article_name, article_eisej, reasons || [], user)
 
+    useEffect(() => {
+        if (props.eisej_id) {
+            form.setFieldsValue({ article_eisej: props.eisej_id || "" })
+        }
+    }, [props.eisej_id])
+
     return (
         <>
-            <Form form={form} layout="vertical">
+            <Form form={form} layout="vertical" initialValues={{ article_eisej: props?.eisej_id || "", article_title: props.article?.name || "" }}>
                 <Form.Item label="Recipient" name="recipient">
                     <Input placeholder="Recipient" />
                 </Form.Item>
 
                 <Form.Item label="Article title" name="article_title">
-                    <Input placeholder="Article title" defaultValue={props.article?.name} />
+                    <Input placeholder="Article title" />
                 </Form.Item>
 
                 <Form.Item label="Article EISEJ" name="article_eisej">
