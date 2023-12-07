@@ -20,6 +20,8 @@ def get_current_user(request: Request, db: Session = Depends(get_db)) -> UserOrm
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized")
 
     user = UserManager.find_by_id(db, user_cookie.user_id)
-    # TODO: Set users last login here
+    user.last_login = datetime.now()
+
+    UserManager.create(db, user)
 
     return user

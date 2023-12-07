@@ -9,4 +9,6 @@ class ArticleManager(BaseModelManager[ArticleOrm]):
 
     @classmethod
     def all_with_creators(cls, db: Session):
-        return db.query(ArticleOrm).options(joinedload(ArticleOrm.creator)).all()
+        return (
+            db.query(ArticleOrm).order_by(cls.__model__.created_at.desc()).options(joinedload(ArticleOrm.creator)).all()
+        )
