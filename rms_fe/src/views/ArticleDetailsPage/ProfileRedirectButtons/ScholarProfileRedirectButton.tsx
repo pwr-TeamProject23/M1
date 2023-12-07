@@ -40,11 +40,10 @@ const ScholarProfileRedirectButton = (props: ScholarProfileRedirectButtonProps) 
                     <div
                         id="scrollableDiv"
                         style={{
-                            height: 400,
-                            overflow: "auto",
-                            padding: "0 16px",
-                        }}
-                    >
+                            height: "70vh",
+                            overflow: 'auto',
+                            padding: '0 16px',
+                        }}>
                         <List
                             itemLayout="horizontal"
                             dataSource={scholarAuthor.data?.authors}
