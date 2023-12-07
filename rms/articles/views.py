@@ -23,7 +23,8 @@ router = APIRouter()
 
 
 @router.get("/")
-def list_articles_view(db: Session = Depends(get_db)) -> list[ArticleWithCreator]:
+def list_articles_view(db: Session = Depends(get_db), user: UserOrm = Depends(get_current_user)) -> list[
+    ArticleWithCreator]:
     return list_articles(db)
 
 
@@ -34,7 +35,8 @@ def create_article_view(article: CreateArticleData, db: Session = Depends(get_db
 
 
 @router.get("/{article_id}")
-def get_article_details_view(article_id: int, db: Session = Depends(get_db)) -> ArticleWithDetails:
+def get_article_details_view(article_id: int, db: Session = Depends(get_db),
+                             user: UserOrm = Depends(get_current_user)) -> ArticleWithDetails:
     article = get_article_details(db, article_id)
 
     if article is None:
@@ -48,6 +50,7 @@ def partial_update_article_view(
         article_id: int,
         article: ArticlePartialUpdate,
         db: Session = Depends(get_db),
+        user: UserOrm = Depends(get_current_user)
 ) -> Article:
     article = partial_update_article(db, article_id, article)
 
@@ -58,7 +61,8 @@ def partial_update_article_view(
 
 
 @router.post("/{article_id}/process-pdf")
-async def process_article_pdf_view(article_id: int, db: Session = Depends(get_db)) -> PdfArticleData:
+async def process_article_pdf_view(article_id: int, db: Session = Depends(get_db),
+                                   user: UserOrm = Depends(get_current_user)) -> PdfArticleData:
     article = ArticleManager.find_by_id(db, article_id)
 
     if article is None:

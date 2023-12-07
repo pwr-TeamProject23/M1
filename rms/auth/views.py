@@ -29,7 +29,7 @@ def login(login_data: LoginRequest, db: Session = Depends(get_db)) -> Response:
 
 
 @router.post("/logout")
-def logout(request: Request, db: Session = Depends(get_db)) -> Response:
+def logout(request: Request, db: Session = Depends(get_db), user: UserOrm = Depends(get_current_user)) -> Response:
     auth_cookie_value = request.cookies.get("auth_cookie")
 
     if not auth_cookie_value or not invalidate_cookie(db, auth_cookie_value):

@@ -19,7 +19,7 @@ def single_article(db) -> tuple[ArticleOrm, FileOrm]:
     return a, f
 
 
-def test_article_list_view(client, db):
+def test_article_list_view(authenticated_client, db):
     f = FileOrm(name="x", path="x", uploaded_at=datetime.now())
     f = FileManager.create(db, f)
 
@@ -28,7 +28,7 @@ def test_article_list_view(client, db):
         ArticleManager.create(db, a)
 
     articles = ArticleManager.all(db)
-    response = client.get("/article")
+    response = authenticated_client.get("/article")
 
     data = response.json()
 
@@ -37,10 +37,10 @@ def test_article_list_view(client, db):
     assert len(data) == len(articles)
 
 
-def test_get_articles_detail_view__found_object(client, db, single_article):
+def test_get_articles_detail_view__found_object(authenticated_client, db, single_article):
     article, file = single_article
 
-    response = client.get(f"/article/{article.id}")
+    response = authenticated_client.get(f"/article/{article.id}")
     data = response.json()
 
     assert response.status_code == 200
@@ -53,8 +53,8 @@ def test_get_articles_detail_view__found_object(client, db, single_article):
     assert data["file"]["path"] == file.path
 
 
-def test_get_articles_detail_view__not_found_object(client):
-    response = client.get("/article/1")
+def test_get_articles_detail_view__not_found_object(authenticated_client):
+    response = authenticated_client.get("/article/1")
     data = response.json()
 
     assert response.status_code == 404
