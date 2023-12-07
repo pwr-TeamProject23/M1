@@ -242,12 +242,14 @@ export const ArticleDetailsPage = () => {
                 >
                     Uploaded file
                 </Tag>
-                <Tag
-                    style={{ userSelect: "none", cursor: "pointer" }}
-                    onClick={() => copyToClipboard("20231016103951")}
-                >
-                    EISEJ: 20231016103951
-                </Tag>
+                {articleFeatures.data?.eisej_id && (
+                    <Tag
+                        style={{ userSelect: "none", cursor: "pointer" }}
+                        onClick={() => copyToClipboard("20231016103951")}
+                    >
+                        {articleFeatures.data?.eisej_id}
+                    </Tag>
+                )}
             </Space>
 
             <Typography.Title level={4} style={{ marginTop: "2em" }}>
