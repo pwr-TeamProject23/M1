@@ -1,10 +1,16 @@
 import axios from 'axios';
-import { DblpAuthorResponse, ScholarAuthorResponse, ScopusAuthorResponse, SearchBody, SearchResponse } from '../types/api/search-engine';
+import { DblpAuthorResponse, ScholarAuthorResponse, ScholarSearchBody, ScopusAuthorResponse, SearchBody, SearchResponse } from '../types/api/search-engine';
 
 
 export const searchArticles = async (searchBody: SearchBody): Promise<SearchResponse> => {
     const response = await axios.post<SearchResponse>('search_engine/discover_reviewers', searchBody);
     return response.data;
+}
+
+export const searchArticlesScholar = async (searchBody: ScholarSearchBody): Promise<SearchResponse> => {
+    const response = await axios.post<SearchResponse>('search_engine/discover_reviewers_scholar', searchBody);
+    return response.data;
+
 }
 
 export const getAuthorDBLP = async (author_name: string): Promise<DblpAuthorResponse> => {

@@ -1,8 +1,9 @@
 from pydantic import BaseModel
 
 
-class ScholarAuthorSearchBody(BaseModel):
-    author_name: str
+class   ScholarArticlesSearchBody(BaseModel):
+    keywords: list[str] = []
+    num_articles: int = 10
 
 
 class ScholarAuthor(BaseModel):
@@ -44,3 +45,29 @@ class ScholarApiAuthor(BaseModel):
 
 class ScholarAuthorClientResponse(BaseModel):
     authors: list[ScholarApiAuthor] = []
+
+
+class Bib(BaseModel):
+    abstract: str | None
+    author: list[str] = []
+    pub_year: str | None
+    title: str | None
+    venue: str | None
+
+
+class ScholarApiArticle(BaseModel):
+    author_id: list[str] = []
+    bib: Bib | None
+    citedby_url: str | None = None
+    eprint_url: str | None = None
+    filled: bool | None
+    gsrank: int | None
+    num_citations: int | None
+    pub_url: str | None = None
+    source: str | None = None
+    url_add_sclib: str | None = None
+    url_scholarbib: str | None = None
+
+
+class ScholarArticlesClientResponse(BaseModel):
+    articles: list[ScholarApiArticle] = []

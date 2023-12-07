@@ -1,21 +1,23 @@
 import { useNavigate, useParams } from "react-router-dom"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { extractArticlePdfFeatures, singleArticle, updateArticle } from "../../clients/articles.ts"
-import { searchArticles } from "../../clients/search-engine.ts"
-import { Button, Flex, message, Space, Tag, Typography, Steps, Divider, FloatButton, Skeleton } from "antd"
+import { searchArticles, searchArticlesScholar } from "../../clients/search-engine.ts"
+import { Button, Flex, message, Space, Tag, Typography, Steps, Divider, FloatButton, Skeleton, Tabs } from "antd"
 import { EditableTextField } from "../../components/EditableTextField.tsx"
 import { ArticleCreator, ArticleUpdate } from "../../types/api/article.ts"
 import { EyeOutlined, LeftCircleOutlined, SearchOutlined, MailOutlined } from "@ant-design/icons"
 import * as React from "react"
+import "./ArticleDetailsPage.css"
 import { ArticlePreviewModal } from "./ArticlePreviewModal.tsx"
 import { useState } from "react"
 import { copyToClipboard } from "../../utils/copy.ts"
 import { ArticleFeatures } from "./ArticleFeatures.tsx"
-import { SearchBody, SearchResponse } from "../../types/api/search-engine.ts"
+import { ScholarSearchBody, SearchBody, SearchResponse } from "../../types/api/search-engine.ts"
 import { ArticleRecommendations } from "./ArticleRecommendations.tsx"
 import { useSearchParamsState } from "../../hooks/useSearchParamsState.ts"
 import { ArticleRejectionEmailCreatorDialog } from "./ArticleRejectionEmailCreator.tsx"
 import { SortingOptionsSelect } from "../../components/forms/SortingOptionsSelect.tsx"
+import { ScholarIcon, ScopusIcon } from "../../components/ServicesIcons.tsx"
 
 const useArticle = (id: string | number) => {
     return useQuery({ queryKey: ["article", id], queryFn: () => singleArticle(id) })
@@ -48,7 +50,17 @@ const useSearchArticles = () => {
         },
         onError: (error) => {
             message.error(error.message)
-            console.error(error)
+        },
+    })
+}
+
+const useSearchArticlesScholar = () => {
+    return useMutation<SearchResponse, Error, ScholarSearchBody>({
+        mutationFn: (searchBody: ScholarSearchBody) => {
+            return searchArticlesScholar(searchBody)
+        },
+        onError: (error) => {
+            message.error(error.message)
         },
     })
 }
@@ -68,6 +80,7 @@ export const ArticleDetailsPage = () => {
 
     const [pdfPreviewIsOpen, setPdfPreviewIsOpen] = useState(false)
     const [recommendations, setRecommendations] = useState<SearchResponse>()
+    const [recommendationsScholar, setRecommendationsScholar] = useState<SearchResponse>()
     const [currentStep, setCurrentStep] = useState(0)
     const [searchParameters, setSearchParameters] = useState<SearchBody>()
     const [isRejectionEmailDialogOpen, setIsRejectionEmailDialogOpen] = useSearchParamsState(
@@ -90,6 +103,7 @@ export const ArticleDetailsPage = () => {
     }, [currentStep])
 
     const searchArticles = useSearchArticles()
+    const searchArticlesScholar = useSearchArticlesScholar()
 
     const handleGenerateRecommendations = (searchBody: SearchBody) => {
         setSearchParameters(searchBody)
@@ -97,6 +111,19 @@ export const ArticleDetailsPage = () => {
             onSuccess: (data) => {
                 setCurrentStep(Step.Recommendations)
                 setRecommendations(data)
+                handleGenerateRecommendationsScholar({
+                    keywords: searchBody.keywords,
+                    num_articles: searchBody.count,
+                })
+            },
+        })
+    }
+
+    const handleGenerateRecommendationsScholar = (searchBody: ScholarSearchBody) => {
+        searchArticlesScholar.mutate(searchBody, {
+            onSuccess: (data) => {
+                setCurrentStep(Step.Recommendations)
+                setRecommendationsScholar(data)
             },
         })
     }
@@ -134,40 +161,44 @@ export const ArticleDetailsPage = () => {
                     isLoadingFeatures={articleFeatures.isLoading}
                     isLoadingArticles={searchArticles.isPending}
                     onGenerateRecommendations={handleGenerateRecommendations}
+                    onGenerateRecommendationsScholar={handleGenerateRecommendationsScholar}
                 />
             ),
         },
         {
             title: "Recommendations",
             content: (
-                <div style={{ minHeight: "100vh" }}>
-                    <Flex gap={5} style={{ marginTop: "10px" }}>
-                        <SortingOptionsSelect
-                            handleSortingChange={handleSortingChange}
-                            selectedLabels={searchParameters?.sort_by}
-                        />
-                        <Button
-                            type="primary"
-                            icon={<SearchOutlined />}
-                            onClick={handleRecommendationsReload}
-                            loading={searchArticles.isPending}
-                        >
-                            Reload
-                        </Button>
-                    </Flex>
-                    {searchArticles.isPending ? (
-                        Array(searchParameters?.count)
-                            .fill(null)
-                            .map((n) => (
-                                <Flex vertical key={n} gap={10} style={{ marginTop: "20px" }}>
-                                    <Skeleton active />
-                                    <Divider />
-                                </Flex>
-                            ))
-                    ) : (
-                        <ArticleRecommendations recommendations={recommendations} />
-                    )}
-                </div>
+                <Tabs
+                    centered
+                    items={[
+                        {
+                            label: "Scopus",
+                            key: "scopus",
+                            icon: <ScopusIcon />,
+                            children: (
+                                <ScopusRecommendationsTab
+                                    handleRecommendationsReload={handleRecommendationsReload}
+                                    handleSortingChange={handleSortingChange}
+                                    recommendations={recommendations}
+                                    searchParameters={searchParameters}
+                                    isLoading={searchArticles.isPending}
+                                />
+                            ),
+                        },
+                        {
+                            label: "Google Scholar",
+                            key: "google-scholar",
+                            icon: <ScholarIcon />,
+                            children: (
+                                <ScholarRecommendationsTab
+                                    recommendations={recommendationsScholar}
+                                    searchParameters={searchParameters}
+                                    isLoading={searchArticlesScholar.isPending}
+                                />
+                            ),
+                        },
+                    ]}
+                />
             ),
         },
     ]
@@ -280,5 +311,81 @@ export const ArticleDetails = (props: ArticleDetailsProps) => {
         <>
             Created by: {fullName} on {new Date(props.createdAt).toLocaleString()}
         </>
+    )
+}
+
+type ScopusRecommendationsTabProps = {
+    recommendations?: SearchResponse
+    handleSortingChange: (newSorting: string[]) => void
+    handleRecommendationsReload: () => void
+    searchParameters?: SearchBody
+    isLoading: boolean
+}
+
+const ScopusRecommendationsTab: React.FC<ScopusRecommendationsTabProps> = ({
+    recommendations,
+    handleSortingChange,
+    handleRecommendationsReload,
+    searchParameters,
+    isLoading,
+}) => {
+    return (
+        <div style={{ minHeight: "100vh" }}>
+            <Flex gap={5} style={{ marginTop: "10px" }}>
+                <SortingOptionsSelect
+                    handleSortingChange={handleSortingChange}
+                    selectedLabels={searchParameters?.sort_by}
+                />
+                <Button
+                    type="primary"
+                    icon={<SearchOutlined />}
+                    onClick={handleRecommendationsReload}
+                    loading={isLoading}
+                >
+                    Reload
+                </Button>
+            </Flex>
+            {isLoading ? (
+                Array(searchParameters?.count)
+                    .fill(null)
+                    .map((_, n) => (
+                        <Flex vertical key={n} gap={10} style={{ marginTop: "20px" }}>
+                            <Skeleton active />
+                            <Divider />
+                        </Flex>
+                    ))
+            ) : (
+                <ArticleRecommendations recommendations={recommendations} />
+            )}
+        </div>
+    )
+}
+
+type ScholarRecommendationsTabProps = {
+    recommendations?: SearchResponse
+    searchParameters?: SearchBody
+    isLoading: boolean
+}
+
+const ScholarRecommendationsTab: React.FC<ScholarRecommendationsTabProps> = ({
+    recommendations,
+    searchParameters,
+    isLoading,
+}) => {
+    return (
+        <div style={{ minHeight: "100vh", marginTop: "10px" }}>
+            {isLoading ? (
+                Array(searchParameters?.count)
+                    .fill(null)
+                    .map((_, n) => (
+                        <Flex vertical key={n + 25} gap={10} style={{ marginTop: "20px" }}>
+                            <Skeleton active />
+                            <Divider />
+                        </Flex>
+                    ))
+            ) : (
+                <ArticleRecommendations recommendations={recommendations} />
+            )}
+        </div>
     )
 }
