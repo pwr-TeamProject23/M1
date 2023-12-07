@@ -45,6 +45,7 @@ def process_file(stream: BinaryIO) -> PdfArticleData:
         name=data.name,
         keywords=data.keywords + text_keywords.tolist(),
         authors=data.authors,
+        eisej_id=data.eisej_id
     )
 
 
@@ -81,6 +82,7 @@ class PageDataExtractor:
             name=self._extract_name(),
             keywords=self._extract_keywords(),
             authors=authors,
+            eisej_id=self.extract_eisej_id()
         )
 
     @on_error(return_value="Error during name extraction")
@@ -134,3 +136,8 @@ class PageDataExtractor:
     def extract_emails(self) -> list[str]:
         email_regex = re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b")
         return email_regex.findall(self.second_page_content)
+
+    @on_error(return_value="Error during eisej id extraction")
+    def extract_eisej_id(self) -> str:
+        eisej_idx = find_index_containing(self.first_page_content_lines, "Manuscript ID")
+        return self.first_page_content_lines[eisej_idx].split("Manuscript ID")[1].strip()

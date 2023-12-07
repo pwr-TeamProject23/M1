@@ -11,12 +11,14 @@ class PdfArticleData(BaseModel):
     name: str
     authors: list[Author]
     keywords: list[str]
+    eisej_id: str
 
 
 class FirstPagePdfData(BaseModel):
     name: str
     authors: list[Author]
     keywords: list[str]
+    eisej_id: str
 
 
 class FileUploadResult(BaseModel):
