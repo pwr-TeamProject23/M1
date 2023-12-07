@@ -1,8 +1,10 @@
-from rms.search_engine.clients import ScopusApi, DblpAuthorSearchApi, ScholarAuthorSearchApi
+import uuid
+
+from rms.search_engine.clients import ScopusApi, DblpApi, ScholarApi
 from rms.search_engine.models import SearchBody, ScopusSearchResponse, SearchResponse, Affiliation, Author, Article
 from rms.search_engine.models.dblp_models import DblpAuthorResponse, DblpAuthor
 from rms.search_engine.models.models import AuthorSearch, ScopusAuthorResponse
-from rms.search_engine.models.scholar_models import ScholarAuthorResponse, ScholarAuthor
+from rms.search_engine.models.scholar_models import ScholarAuthorResponse, ScholarAuthor, ScholarArticlesSearchBody
 
 
 def transform_scopus_response(scopus_response: ScopusSearchResponse) -> SearchResponse:
@@ -102,8 +104,8 @@ async def get_author_scopus_service(author_lastname: str, author_firstname: str)
 
 
 async def get_author_dblp_service(author_name: str) -> DblpAuthorResponse | None:
-    client = DblpAuthorSearchApi()
-    response = await client.search(author_name)
+    client = DblpApi()
+    response = await client.get_author(author_name)
 
     if response.result.hits.total == 0:
         return DblpAuthorResponse(authors=[])
@@ -123,8 +125,8 @@ async def get_author_dblp_service(author_name: str) -> DblpAuthorResponse | None
 
 
 async def get_author_scholar_service(author_name: str) -> ScholarAuthorResponse | None:
-    client = ScholarAuthorSearchApi()
-    response = await client.search(author_name)
+    client = ScholarApi()
+    response = await client.get_author(author_name)
 
     if not response or not response.authors:
         return ScholarAuthorResponse(authors=[])
@@ -146,3 +148,56 @@ async def get_author_scholar_service(author_name: str) -> ScholarAuthorResponse 
     ]
 
     return ScholarAuthorResponse(authors=authors)
+
+
+async def search_scholar_service(query: ScholarArticlesSearchBody) -> SearchResponse:
+    client = ScholarApi()
+    response = await client.search(query)
+
+    articles = []
+
+    for entry in response.articles:
+        if entry.bib is None:
+            continue
+
+        authors = []
+
+        for author_idx in range(len(entry.bib.author)):
+            author = entry.bib.author[author_idx]
+            author_url = None
+            if entry.author_id[author_idx] != "":
+                author_url = f"https://scholar.google.com/citations?user={entry.author_id[author_idx]}"
+
+            authors.append(
+                Author(
+                    name=author,
+                    surname=author.split(" ")[-1],
+                    given_name=" ".join(author.split(" ")[:-1]),
+                    scholar_url=author_url
+                )
+            )
+
+        article = Article(
+            identifier=str(uuid.uuid4()),
+            title=entry.bib.title,
+            doi_url=entry.pub_url,
+            cited_by_count=str(entry.num_citations),
+            cover_date=entry.bib.pub_year,
+            authors=authors,
+            publication_name=entry.bib.venue,
+            description=entry.bib.abstract
+        )
+        articles.append(article)
+
+    if len(articles) == 0:
+        return SearchResponse(
+            articles=[],
+            total_results="0",
+            items_per_page="0"
+        )
+
+    return SearchResponse(
+        articles=articles,
+        total_results=str(query.num_articles),
+        items_per_page=str(query.num_articles)
+    )

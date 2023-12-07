@@ -50,7 +50,6 @@ const useSearchArticles = () => {
         },
         onError: (error) => {
             message.error(error.message)
-            console.error(error)
         },
     })
 }
@@ -62,7 +61,6 @@ const useSearchArticlesScholar = () => {
         },
         onError: (error) => {
             message.error(error.message)
-            console.error(error)
         },
     })
 }

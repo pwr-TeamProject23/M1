@@ -1,9 +1,11 @@
 import httpx
 from abc import ABC
 from typing import Any
+
 from rms.search_engine.models import SearchBody, ScopusSearchResponse
 from rms.search_engine.models.dblp_models import DblpAuthorClientResponse
-from rms.search_engine.models.scholar_models import ScholarAuthorClientResponse, ScholarApiAuthor
+from rms.search_engine.models.scholar_models import ScholarAuthorClientResponse, ScholarApiAuthor, \
+    ScholarArticlesClientResponse, ScholarApiArticle, ScholarArticlesSearchBody
 from rms.search_engine.models.scopus_models import ScopusAuthorResponse
 from rms.search_engine.utils import StopWordsProcessor
 from rms.settings import Settings
@@ -41,7 +43,8 @@ class ScopusApi(ScopusClient):
 
             return ScopusAuthorResponse(**response.json())
 
-    def build_author_params(self, author_lastname: str, author_firstname: str) -> dict[str, Any]:
+    @staticmethod
+    def build_author_params(author_lastname: str, author_firstname: str) -> dict[str, Any]:
         params = {
             "query": f"AUTHLASTNAME({author_lastname}) AND AUTHFIRST({author_firstname})",
             "view": "STANDARD",
@@ -106,9 +109,9 @@ class DblpClient(ABC):
         self.dblp_search_api_endpoint = self.settings.dblp_search_endpoint
 
 
-class DblpAuthorSearchApi(DblpClient):
+class DblpApi(DblpClient):
 
-    async def search(self, author_name: str) -> DblpAuthorClientResponse:
+    async def get_author(self, author_name: str) -> DblpAuthorClientResponse:
         params = self.build_params(author_name)
 
         async with httpx.AsyncClient() as client:
@@ -132,9 +135,9 @@ class ScholarClient(ABC):
         self.sections = ["basics", "indices"]
 
 
-class ScholarAuthorSearchApi(ScholarClient):
+class ScholarApi(ScholarClient):
 
-    async def search(self, author_name: str) -> ScholarAuthorClientResponse | None:
+    async def get_author(self, author_name: str) -> ScholarAuthorClientResponse | None:
         authors = []
 
         try:
@@ -148,3 +151,24 @@ class ScholarAuthorSearchApi(ScholarClient):
             pass
         finally:
             return ScholarAuthorClientResponse(authors=authors)
+
+    @staticmethod
+    async def search(query: ScholarArticlesSearchBody) -> ScholarArticlesClientResponse | None:
+
+        articles = []
+
+        found_num = 0
+
+        search_query = scholarly.search_pubs(
+            query=" ".join(query.keywords),
+            year_low=2005,
+        )
+
+        for article in search_query:
+            if found_num < query.num_articles:
+                articles.append(ScholarApiArticle(**article))
+                found_num += 1
+            else:
+                break
+
+        return ScholarArticlesClientResponse(articles=articles)

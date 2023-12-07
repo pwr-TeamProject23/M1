@@ -44,7 +44,7 @@ const ScopusProfileRedirectButton = (props: ScopusProfileRedirectButtonProps) =>
             window.open(scopusAuthor.data.authors[0].scopus_url, "_blank")
         } else {
             Modal.info({
-                title: "DBLP profiles that match with the author name",
+                title: "Scopus profiles that match with the author name",
                 maskClosable: true,
                 content: (
                     <div

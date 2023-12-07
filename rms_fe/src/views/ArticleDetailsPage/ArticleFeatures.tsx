@@ -31,7 +31,7 @@ export interface AuthorProfileButtonProps {
 }
 
 export const ArticleFeatures = (props: ArticleFeaturesProps) => {
-    const [authorOrcids, setAuthorOrcids] = useState<{ [key: string]: string }>({})
+    const [authorOrcids, setAuthorOrcids] = useState<Record<string, string>>({})
     const [form] = Form.useForm<IArticleFeaturesForm>()
     const initialValues = {
         ...props.features,
