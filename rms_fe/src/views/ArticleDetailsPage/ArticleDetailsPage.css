@@ -1,0 +1,7 @@
+.ant-tabs-nav {
+    position: sticky!important;
+    top: 94.8px;
+    background-color: white;
+    width: 100%;
+    z-index: 1000;
+}

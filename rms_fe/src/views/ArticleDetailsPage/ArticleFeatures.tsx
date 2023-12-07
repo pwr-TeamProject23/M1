@@ -1,13 +1,13 @@
-import { Button, Form, Input, Typography, Empty, Flex, InputNumber, List, Avatar, Popover } from 'antd';
-import { ExtractedPdfFeatures } from '../../types/api/article.ts';
-import { EditableTagsInput } from '../../components/forms/EditableTagsInput.tsx';
-import { SearchBody } from '../../types/api/search-engine.ts';
-import DblpProfileRedirectButton from './ProfileRedirectButtons/DblpProfileRedirectButton.tsx';
-import ScholarProfileRedirectButton from './ProfileRedirectButtons/ScholarProfileRedirectButton.tsx';
-import ScopusProfileRedirectButton from './ProfileRedirectButtons/ScopusProfileRedirectButton.tsx';
+import { Button, Form, Input, Typography, Empty, Flex, InputNumber, List, Avatar, Popover } from "antd"
+import { ExtractedPdfFeatures } from "../../types/api/article.ts"
+import { EditableTagsInput } from "../../components/forms/EditableTagsInput.tsx"
+import { ScholarSearchBody, SearchBody } from "../../types/api/search-engine.ts"
+import DblpProfileRedirectButton from "./ProfileRedirectButtons/DblpProfileRedirectButton.tsx"
+import ScholarProfileRedirectButton from "./ProfileRedirectButtons/ScholarProfileRedirectButton.tsx"
+import ScopusProfileRedirectButton from "./ProfileRedirectButtons/ScopusProfileRedirectButton.tsx"
 import { SortingOptionsSelect } from "../../components/forms/SortingOptionsSelect.tsx"
-import { useState } from 'react';
-import { InfoCircleOutlined } from '@ant-design/icons';
+import { useState } from "react"
+import { InfoCircleOutlined } from "@ant-design/icons"
 
 export type ArticleFeaturesProps = {
     features?: ExtractedPdfFeatures
@@ -15,6 +15,7 @@ export type ArticleFeaturesProps = {
     isLoadingFeatures: boolean
     isLoadingArticles: boolean
     onGenerateRecommendations: (searchBody: SearchBody) => void
+    onGenerateRecommendationsScholar: (searchBody: ScholarSearchBody) => void
 }
 
 export type IArticleFeaturesForm = {
@@ -30,7 +31,7 @@ export interface AuthorProfileButtonProps {
 }
 
 export const ArticleFeatures = (props: ArticleFeaturesProps) => {
-    const [authorOrcids, setAuthorOrcids] = useState<{ [key: string]: string }>({});
+    const [authorOrcids, setAuthorOrcids] = useState<{ [key: string]: string }>({})
     const [form] = Form.useForm<IArticleFeaturesForm>()
     const initialValues = {
         ...props.features,
@@ -48,11 +49,11 @@ export const ArticleFeatures = (props: ArticleFeaturesProps) => {
     }
 
     const handleAuthorOrcid = (authorFirstName: string, authorLastName: string, orcid: string) => {
-        setAuthorOrcids(prevOrcids => ({
+        setAuthorOrcids((prevOrcids) => ({
             ...prevOrcids,
-            [`${authorFirstName} ${authorLastName}`]: orcid
-        }));
-    };
+            [`${authorFirstName} ${authorLastName}`]: orcid,
+        }))
+    }
 
     const handleFormSubmit = (values: IArticleFeaturesForm) => {
         props.onGenerateRecommendations({
@@ -86,24 +87,42 @@ export const ArticleFeatures = (props: ArticleFeaturesProps) => {
                                     <List.Item>
                                         <Flex gap={10} style={{ alignItems: "center", width: "100%" }}>
                                             <div style={{ flex: 1 }}>
-                                                <Avatar src={`https://xsgames.co/randomusers/avatar.php?g=pixel&key=${index}`} />
+                                                <Avatar
+                                                    src={`https://xsgames.co/randomusers/avatar.php?g=pixel&key=${index}`}
+                                                />
                                             </div>
                                             <div style={{ flex: 10 }}>
-                                                <Flex style={{ justifyContent: "space-between", width: "100%"}}>
+                                                <Flex style={{ justifyContent: "space-between", width: "100%" }}>
                                                     <Flex vertical>
-                                                    <Flex gap={5} align='center'>
-                                                        <Typography.Text strong >{authorName}</Typography.Text>
-                                                        {authorOrcids[authorName] && <Popover content={
-                                                            <Typography.Text type='secondary'>{`ORCID: ${authorOrcids[authorName]}`}</Typography.Text>
-                                                        }>
-                                                            <InfoCircleOutlined />
-                                                        </Popover>}
-                                                    </Flex>
-                                                        <Typography.Text type='secondary'>{author.email}</Typography.Text>
+                                                        <Flex gap={5} align="center">
+                                                            <Typography.Text strong>{authorName}</Typography.Text>
+                                                            {authorOrcids[authorName] && (
+                                                                <Popover
+                                                                    content={
+                                                                        <Typography.Text type="secondary">{`ORCID: ${authorOrcids[authorName]}`}</Typography.Text>
+                                                                    }
+                                                                >
+                                                                    <InfoCircleOutlined />
+                                                                </Popover>
+                                                            )}
+                                                        </Flex>
+                                                        <Typography.Text type="secondary">
+                                                            {author.email}
+                                                        </Typography.Text>
                                                     </Flex>
 
                                                     <Flex gap={10}>
-                                                        <ScopusProfileRedirectButton author_firstname={author.first_name} author_lastname={author.last_name} onOrcidUpdate={(orcid) => handleAuthorOrcid(author.first_name, author.last_name, orcid)} />
+                                                        <ScopusProfileRedirectButton
+                                                            author_firstname={author.first_name}
+                                                            author_lastname={author.last_name}
+                                                            onOrcidUpdate={(orcid) =>
+                                                                handleAuthorOrcid(
+                                                                    author.first_name,
+                                                                    author.last_name,
+                                                                    orcid
+                                                                )
+                                                            }
+                                                        />
                                                         <DblpProfileRedirectButton authorName={authorName} />
                                                         <ScholarProfileRedirectButton authorName={authorName} />
                                                     </Flex>
