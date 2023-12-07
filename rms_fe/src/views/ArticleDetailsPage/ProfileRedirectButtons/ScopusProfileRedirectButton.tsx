@@ -50,11 +50,10 @@ const ScopusProfileRedirectButton = (props: ScopusProfileRedirectButtonProps) =>
                     <div
                         id="scrollableDiv"
                         style={{
-                            height: 400,
-                            overflow: "auto",
-                            padding: "0 16px",
-                        }}
-                    >
+                            height: "70vh",
+                            overflow: 'auto',
+                            padding: '0 16px',
+                        }}>
                         <List
                             itemLayout="horizontal"
                             dataSource={scopusAuthor.data?.authors}

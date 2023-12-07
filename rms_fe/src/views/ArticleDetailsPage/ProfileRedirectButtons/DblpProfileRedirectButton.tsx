@@ -31,11 +31,10 @@ const DblpProfileRedirectButton = (props: DblpProfileRedirectButtonProps) => {
                     <div
                         id="scrollableDiv"
                         style={{
-                            height: 400,
-                            overflow: "auto",
-                            padding: "0 16px",
-                        }}
-                    >
+                            height: "70vh",
+                            overflow: 'auto',
+                            padding: '0 16px',
+                        }}>
                         <List
                             itemLayout="horizontal"
                             dataSource={dblpAuthor.data?.authors}
