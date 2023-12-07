@@ -39,8 +39,8 @@ const LoginPage = () => {
     const userStore = useAuthStore()
 
     useEffect(() => {
-        userStore.isLoggedIn().then(() => {
-            navigate("/app/articles")
+        userStore.isLoggedIn().then((isLoggedIn) => {
+            if (isLoggedIn) navigate("/app/articles")
         })
     }, [])
 

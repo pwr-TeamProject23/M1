@@ -3,7 +3,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { extractArticlePdfFeatures, singleArticle, updateArticle } from "../../clients/articles.ts"
 import { searchArticles, searchArticlesScholar } from "../../clients/search-engine.ts"
 import { Button, Flex, message, Space, Tag, Typography, Steps, Divider, FloatButton, Skeleton, Tabs } from "antd"
-import { EditableTextField } from "../../components/EditableTextField.tsx"
 import { ArticleCreator, ArticleUpdate } from "../../types/api/article.ts"
 import { EyeOutlined, LeftCircleOutlined, SearchOutlined, MailOutlined } from "@ant-design/icons"
 import * as React from "react"
@@ -18,6 +17,7 @@ import { useSearchParamsState } from "../../hooks/useSearchParamsState.ts"
 import { ArticleRejectionEmailCreatorDialog } from "./ArticleRejectionEmailCreator.tsx"
 import { SortingOptionsSelect } from "../../components/forms/SortingOptionsSelect.tsx"
 import { ScholarIcon, ScopusIcon } from "../../components/ServicesIcons.tsx"
+import { EditableMarkdownField } from "../../components/EditableMarkdownField.tsx"
 
 const useArticle = (id: string | number) => {
     return useQuery({ queryKey: ["article", id], queryFn: () => singleArticle(id) })
@@ -89,12 +89,6 @@ export const ArticleDetailsPage = () => {
     )
 
     const stepsRef = React.useRef<HTMLDivElement>(null)
-
-    const notesStyle: React.CSSProperties = {
-        border: "1px solid gray",
-        borderRadius: "4px",
-        padding: "4px 8px",
-    }
 
     React.useEffect(() => {
         if (currentStep === Step.Recommendations) {
@@ -256,11 +250,10 @@ export const ArticleDetailsPage = () => {
             <Typography.Title level={4} style={{ marginTop: "2em" }}>
                 Notes to the article
             </Typography.Title>
-            <EditableTextField value={article.data.notes} onSubmit={(value) => updateArticle.mutate({ notes: value })}>
-                <Typography.Paragraph style={notesStyle}>
-                    {article.data.notes || "Notes regarding the article"}
-                </Typography.Paragraph>
-            </EditableTextField>
+            <EditableMarkdownField
+                value={article.data.notes}
+                onSubmit={(value) => updateArticle.mutate({ notes: value })}
+            />
 
             <Flex vertical align="center">
                 <Flex
