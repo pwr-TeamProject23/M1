@@ -12,7 +12,7 @@ from rms.search_engine.models import SearchBody
                 "query": '(TITLE("test"))',
                 "count": 3,
                 "view": "COMPLETE",
-                "sort": "-relevancy,-citedby-count,-pubyear",
+                "sort": "-relevancy",
             },
         ),
         (
@@ -21,7 +21,7 @@ from rms.search_engine.models import SearchBody
                 "query": '(TITLE("test")) AND (KEY("key1") OR KEY("key2"))',
                 "count": 3,
                 "view": "COMPLETE",
-                "sort": "-relevancy,-citedby-count,-pubyear",
+                "sort": "-relevancy",
             },
         ),
         (
@@ -30,7 +30,7 @@ from rms.search_engine.models import SearchBody
                 "query": '(TITLE("test")) AND (ABS("word1") OR ABS("word2"))',
                 "count": 3,
                 "view": "COMPLETE",
-                "sort": "-relevancy,-citedby-count,-pubyear",
+                "sort": "-relevancy",
             },
         ),
         (
@@ -39,7 +39,7 @@ from rms.search_engine.models import SearchBody
                 "query": '(TITLE("test")) AND (KEY("key1") OR KEY("key2")) AND (ABS("word1") OR ABS("word2"))',
                 "count": 3,
                 "view": "COMPLETE",
-                "sort": "-relevancy,-citedby-count,-pubyear",
+                "sort": "-relevancy",
             },
         ),
     ),
