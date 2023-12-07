@@ -37,4 +37,5 @@ export type ExtractedPdfFeatures = {
     name: string
     authors: Author[]
     keywords: string[]
+    eisej_id: string
 }
