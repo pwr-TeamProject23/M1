@@ -10,7 +10,8 @@ from rms.articles.services import (
     ArticleWithDetails,
     get_article_details,
     partial_update_article,
-    ArticlePartialUpdate, ArticleWithCreator,
+    ArticlePartialUpdate,
+    ArticleWithCreator,
 )
 from rms.auth.dependencies import get_current_user
 from rms.auth.models import UserOrm
@@ -23,20 +24,24 @@ router = APIRouter()
 
 
 @router.get("/")
-def list_articles_view(db: Session = Depends(get_db), user: UserOrm = Depends(get_current_user)) -> list[
-    ArticleWithCreator]:
+def list_articles_view(
+    db: Session = Depends(get_db),
+    user: UserOrm = Depends(get_current_user),
+) -> list[ArticleWithCreator]:
     return list_articles(db)
 
 
 @router.post("/")
-def create_article_view(article: CreateArticleData, db: Session = Depends(get_db),
-                        user: UserOrm = Depends(get_current_user)) -> Article:
+def create_article_view(
+    article: CreateArticleData, db: Session = Depends(get_db), user: UserOrm = Depends(get_current_user)
+) -> Article:
     return create_article(db, user, article)
 
 
 @router.get("/{article_id}")
-def get_article_details_view(article_id: int, db: Session = Depends(get_db),
-                             user: UserOrm = Depends(get_current_user)) -> ArticleWithDetails:
+def get_article_details_view(
+    article_id: int, db: Session = Depends(get_db), user: UserOrm = Depends(get_current_user)
+) -> ArticleWithDetails:
     article = get_article_details(db, article_id)
 
     if article is None:
@@ -47,10 +52,10 @@ def get_article_details_view(article_id: int, db: Session = Depends(get_db),
 
 @router.patch("/{article_id}")
 def partial_update_article_view(
-        article_id: int,
-        article: ArticlePartialUpdate,
-        db: Session = Depends(get_db),
-        user: UserOrm = Depends(get_current_user)
+    article_id: int,
+    article: ArticlePartialUpdate,
+    db: Session = Depends(get_db),
+    user: UserOrm = Depends(get_current_user),
 ) -> Article:
     article = partial_update_article(db, article_id, article)
 
@@ -61,8 +66,9 @@ def partial_update_article_view(
 
 
 @router.post("/{article_id}/process-pdf")
-async def process_article_pdf_view(article_id: int, db: Session = Depends(get_db),
-                                   user: UserOrm = Depends(get_current_user)) -> PdfArticleData:
+async def process_article_pdf_view(
+    article_id: int, db: Session = Depends(get_db), user: UserOrm = Depends(get_current_user)
+) -> PdfArticleData:
     article = ArticleManager.find_by_id(db, article_id)
 
     if article is None:
