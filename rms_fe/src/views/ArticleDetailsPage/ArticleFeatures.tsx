@@ -1,15 +1,16 @@
 import { Button, Form, Input, Typography, Empty, Flex, InputNumber, List, Avatar, Popover } from "antd"
-import { ExtractedPdfFeatures } from "../../types/api/article.ts"
+import { ArticleWithDetails, ExtractedPdfFeatures } from "../../types/api/article.ts"
 import { EditableTagsInput } from "../../components/forms/EditableTagsInput.tsx"
 import { ScholarSearchBody, SearchBody } from "../../types/api/search-engine.ts"
 import DblpProfileRedirectButton from "./ProfileRedirectButtons/DblpProfileRedirectButton.tsx"
 import ScholarProfileRedirectButton from "./ProfileRedirectButtons/ScholarProfileRedirectButton.tsx"
 import ScopusProfileRedirectButton from "./ProfileRedirectButtons/ScopusProfileRedirectButton.tsx"
 import { SortingOptionsSelect } from "../../components/forms/SortingOptionsSelect.tsx"
-import { useState } from "react"
-import { InfoCircleOutlined } from "@ant-design/icons"
+import { useEffect, useState } from "react"
+import { InfoCircleOutlined, ReloadOutlined } from "@ant-design/icons"
 
 export type ArticleFeaturesProps = {
+    article: ArticleWithDetails
     features?: ExtractedPdfFeatures
     onFetch: () => void
     isLoadingFeatures: boolean
@@ -26,17 +27,26 @@ export type IArticleFeaturesForm = {
     sort_by: string[]
 }
 
-export interface AuthorProfileButtonProps {
-    authorName: string
-}
-
 export const ArticleFeatures = (props: ArticleFeaturesProps) => {
+    const storageKey = `article-${props.article.id}`
     const [authorOrcids, setAuthorOrcids] = useState<Record<string, string>>({})
     const [form] = Form.useForm<IArticleFeaturesForm>()
     const initialValues = {
         ...props.features,
-        count: 10,
+        count: 20,
     }
+
+    useEffect(() => {
+        const data = localStorage.getItem(storageKey)
+        if (!data) return
+
+        try {
+            const parsedInitialValues = JSON.parse(data)
+            form.setFieldValue("keywords", parsedInitialValues.keywords)
+        } catch {
+            /* empty */
+        }
+    }, [])
 
     if (!props.features) {
         return (
@@ -56,6 +66,7 @@ export const ArticleFeatures = (props: ArticleFeaturesProps) => {
     }
 
     const handleFormSubmit = (values: IArticleFeaturesForm) => {
+        localStorage.setItem(storageKey, JSON.stringify(values))
         props.onGenerateRecommendations({
             title: values.name,
             keywords: values.keywords,
@@ -65,11 +76,21 @@ export const ArticleFeatures = (props: ArticleFeaturesProps) => {
         })
     }
 
+    const handleRefresh = () => {
+        localStorage.removeItem(storageKey)
+        form.setFieldValue("keywords", initialValues.keywords)
+    }
+
     return (
         <Form form={form} initialValues={initialValues} onFinish={handleFormSubmit} labelCol={{ span: 24 }}>
             <Flex style={{ marginTop: "10px", gap: "30px" }}>
                 <div style={{ flex: 1 }}>
                     <Flex vertical gap={8}>
+                        <div>
+                            <Button htmlType="button" icon={<ReloadOutlined />} onClick={handleRefresh}>
+                                Refresh
+                            </Button>
+                        </div>
                         <Form.Item name="keywords" label="Keywords::">
                             <EditableTagsInput />
                         </Form.Item>

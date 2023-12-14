@@ -13,7 +13,6 @@ import { copyToClipboard } from "../../utils/copy.ts"
 import { ArticleFeatures } from "./ArticleFeatures.tsx"
 import { ScholarSearchBody, SearchBody, SearchResponse } from "../../types/api/search-engine.ts"
 import { ArticleRecommendations } from "./ArticleRecommendations.tsx"
-import { useSearchParamsState } from "../../hooks/useSearchParamsState.ts"
 import { ArticleRejectionEmailCreatorDialog } from "./ArticleRejectionEmailCreator.tsx"
 import { SortingOptionsSelect } from "../../components/forms/SortingOptionsSelect.tsx"
 import { ScholarIcon, ScopusIcon } from "../../components/ServicesIcons.tsx"
@@ -83,10 +82,7 @@ export const ArticleDetailsPage = () => {
     const [recommendationsScholar, setRecommendationsScholar] = useState<SearchResponse>()
     const [currentStep, setCurrentStep] = useState(0)
     const [searchParameters, setSearchParameters] = useState<SearchBody>()
-    const [isRejectionEmailDialogOpen, setIsRejectionEmailDialogOpen] = useSearchParamsState(
-        "showRejectionEmailDialog",
-        "false"
-    )
+    const [isRejectionEmailDialogOpen, setIsRejectionEmailDialogOpen] = useState(false)
 
     const stepsRef = React.useRef<HTMLDivElement>(null)
 
@@ -150,6 +146,7 @@ export const ArticleDetailsPage = () => {
             title: "Extract Features",
             content: (
                 <ArticleFeatures
+                    article={article.data}
                     features={articleFeatures.data}
                     onFetch={articleFeatures.refetch}
                     isLoadingFeatures={articleFeatures.isLoading}
@@ -163,8 +160,21 @@ export const ArticleDetailsPage = () => {
             title: "Recommendations",
             content: (
                 <Tabs
+                    defaultValue={0}
                     centered
                     items={[
+                        {
+                            label: "Google Scholar",
+                            key: "google-scholar",
+                            icon: <ScholarIcon />,
+                            children: (
+                                <ScholarRecommendationsTab
+                                    recommendations={recommendationsScholar}
+                                    searchParameters={searchParameters}
+                                    isLoading={searchArticlesScholar.isPending}
+                                />
+                            ),
+                        },
                         {
                             label: "Scopus",
                             key: "scopus",
@@ -179,18 +189,6 @@ export const ArticleDetailsPage = () => {
                                 />
                             ),
                         },
-                        {
-                            label: "Google Scholar",
-                            key: "google-scholar",
-                            icon: <ScholarIcon />,
-                            children: (
-                                <ScholarRecommendationsTab
-                                    recommendations={recommendationsScholar}
-                                    searchParameters={searchParameters}
-                                    isLoading={searchArticlesScholar.isPending}
-                                />
-                            ),
-                        },
                     ]}
                 />
             ),
@@ -200,10 +198,10 @@ export const ArticleDetailsPage = () => {
     return (
         <div style={{ padding: "2em 4em" }}>
             <ArticleRejectionEmailCreatorDialog
-                isOpen={isRejectionEmailDialogOpen === "true"}
+                isOpen={isRejectionEmailDialogOpen}
                 article={article.data}
                 eisej_id={articleFeatures.data?.eisej_id}
-                onClose={() => setIsRejectionEmailDialogOpen("false")}
+                onClose={() => setIsRejectionEmailDialogOpen(false)}
             />
             <Button
                 size="large"
@@ -217,7 +215,7 @@ export const ArticleDetailsPage = () => {
             <Flex justify="space-between">
                 <Typography.Title>{article.data.name}</Typography.Title>
                 <Flex gap={12}>
-                    <Button icon={<MailOutlined />} onClick={() => setIsRejectionEmailDialogOpen("true")}>
+                    <Button icon={<MailOutlined />} onClick={() => setIsRejectionEmailDialogOpen(true)}>
                         Compose rejection email
                     </Button>
                     <Button icon={<EyeOutlined />} onClick={() => setPdfPreviewIsOpen(true)}>

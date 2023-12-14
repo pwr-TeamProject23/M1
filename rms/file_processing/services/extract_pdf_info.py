@@ -43,9 +43,9 @@ def process_file(stream: BinaryIO) -> PdfArticleData:
 
     return PdfArticleData(
         name=data.name,
-        keywords=data.keywords + text_keywords.tolist(),
+        keywords=text_keywords.tolist(),
         authors=data.authors,
-        eisej_id=data.eisej_id
+        eisej_id=data.eisej_id,
     )
 
 
@@ -82,7 +82,7 @@ class PageDataExtractor:
             name=self._extract_name(),
             keywords=self._extract_keywords(),
             authors=authors,
-            eisej_id=self.extract_eisej_id()
+            eisej_id=self.extract_eisej_id(),
         )
 
     @on_error(return_value="Error during name extraction")

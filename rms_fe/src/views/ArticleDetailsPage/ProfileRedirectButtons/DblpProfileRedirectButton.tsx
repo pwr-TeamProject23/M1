@@ -9,6 +9,7 @@ const useDblpAuthor = (author_name: string) => {
         queryKey: ["author_dblp", author_name],
         queryFn: () => getAuthorDBLP(author_name),
         staleTime: 60 * 60 * 1000,
+        retry: 1,
     })
 }
 
@@ -32,9 +33,10 @@ const DblpProfileRedirectButton = (props: DblpProfileRedirectButtonProps) => {
                         id="scrollableDiv"
                         style={{
                             height: "70vh",
-                            overflow: 'auto',
-                            padding: '0 16px',
-                        }}>
+                            overflow: "auto",
+                            padding: "0 16px",
+                        }}
+                    >
                         <List
                             itemLayout="horizontal"
                             dataSource={dblpAuthor.data?.authors}
