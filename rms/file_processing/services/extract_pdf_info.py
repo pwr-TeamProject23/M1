@@ -4,6 +4,7 @@ from typing import BinaryIO
 
 import numpy as np
 from pypdf import PdfReader
+from numpy.typing import NDArray
 
 from rms.file_processing.clients import MinioClient
 from rms.file_processing.models import FileOrm
@@ -30,16 +31,9 @@ def process_file(stream: BinaryIO) -> PdfArticleData:
 
     first_page_text = PageFilterer(file.pages[0].extract_text()).filter()
     second_page_text = PageFilterer(file.pages[1].extract_text()).filter()
-    third_page_text = PageFilterer(file.pages[2].extract_text()).filter()
 
+    text_keywords = ModelKeywordsExtractor(file).extract()
     data = PageDataExtractor(first_page_text, second_page_text).extract()
-
-    if settings.use_keyword_extraction_model:
-        from rms.file_processing.services.keyword_extractor import keyword_extractor
-
-        text_keywords = keyword_extractor(second_page_text + "\n" + third_page_text)
-    else:
-        text_keywords = np.array([])
 
     return PdfArticleData(
         name=data.name,
@@ -141,3 +135,31 @@ class PageDataExtractor:
     def extract_eisej_id(self) -> str:
         eisej_idx = find_index_containing(self.first_page_content_lines, "Manuscript ID")
         return self.first_page_content_lines[eisej_idx].split("Manuscript ID")[1].strip()
+
+
+class ModelKeywordsExtractor:
+    PAGE_COUNT_FOR_EXTRACTION = 3
+
+    def __init__(self, file: PdfReader):
+        self.file = file
+        self.pages_of_interest = [
+            PageFilterer(file.pages[idx].extract_text().lower()).filter()
+            for idx in range(1, self.PAGE_COUNT_FOR_EXTRACTION)
+        ]
+        self.content = "\n".join(self.pages_of_interest)
+
+    @on_error(return_value=np.array([]))
+    def extract(self) -> NDArray:
+        if settings.use_keyword_extraction_model:
+            from rms.file_processing.services.keyword_extractor import keyword_extractor
+
+            content = self.content[self._start_of_range() :]
+
+            return keyword_extractor(content)
+        return np.array([])
+
+    def _start_of_range(self):
+        try:
+            return self.content.index("abstract")
+        except ValueError:
+            return 0
