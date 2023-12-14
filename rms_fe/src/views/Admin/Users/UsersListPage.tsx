@@ -24,7 +24,7 @@ export const UsersListPage = () => {
                 type="primary"
                 size="large"
                 icon={<FileAddOutlined />}
-                onClick={() => navigate("/app/users/create")}
+                onClick={() => navigate("/app/admin/users/create")}
             >
                 Add new User
             </Button>
