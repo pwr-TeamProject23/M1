@@ -57,3 +57,12 @@ class UserUpdateModel(BaseModel):
         "last_name",
         "email",
     }
+
+
+class UserCreateModel(BaseModel):
+    first_name: str
+    last_name: str
+    email: str
+    password: str
+
+    model_config = ConfigDict(from_attributes=True)
