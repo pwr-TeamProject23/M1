@@ -9,6 +9,7 @@ import { useAuthStore } from "./state/authState.ts"
 import { ReactNode, useEffect } from "react"
 import { UsersListPage } from "./views/Admin/Users/UsersListPage.tsx"
 import { UsersDetailPage } from "./views/Admin/Users/UsersDetailPage.tsx"
+import { UserCreatePage } from "./views/Admin/Users/UserCreatePage.tsx"
 
 type ProtectedRouteProps = {
     children: ReactNode
@@ -64,6 +65,10 @@ export const router = createBrowserRouter([
                                 path: ":id",
                                 element: <UsersDetailPage />,
                             },
+                            {
+                                path: "create",
+                                element: <UserCreatePage />,
+                            }
                         ],
                     },
                 ],
