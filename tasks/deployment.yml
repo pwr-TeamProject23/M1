@@ -3,4 +3,6 @@ version: 3
 
 tasks:
   up:
-    cmd: docker compose -f docker-compose.production.yml up --build -d
+    cmds:
+      - docker compose -f docker-compose.production.yml up --build -d
+      - docker compose -f docker-compose.production.yml restart proxy

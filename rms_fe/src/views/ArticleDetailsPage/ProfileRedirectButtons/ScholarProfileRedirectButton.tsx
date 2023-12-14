@@ -2,6 +2,7 @@ import { Button, Typography, Flex, List, Avatar, Tooltip, Modal, Badge } from "a
 import { ScholarIcon } from "../../../components/ServicesIcons.tsx"
 import { getAuthorScholar } from "../../../clients/search-engine.ts"
 import { useQuery } from "@tanstack/react-query"
+import { useEffect } from "react"
 
 const useScholarAuthor = (author_name: string) => {
     return useQuery({
@@ -9,6 +10,7 @@ const useScholarAuthor = (author_name: string) => {
         enabled: false,
         queryFn: () => getAuthorScholar(author_name),
         staleTime: 60 * 60 * 1000,
+        retry: 1,
     })
 }
 
@@ -21,9 +23,11 @@ const ScholarProfileRedirectButton = (props: ScholarProfileRedirectButtonProps) 
     const scholarAuthor = useScholarAuthor(props.authorName)
     const authorsLength = scholarAuthor.data?.authors?.length
 
-    if (!props.url && !scholarAuthor.data) {
-        scholarAuthor.refetch()
-    }
+    useEffect(() => {
+        if (!props.url && !scholarAuthor.data) {
+            scholarAuthor.refetch()
+        }
+    }, [props.url, scholarAuthor.data])
 
     const handleScholarClick = async () => {
         if (props.url) {
@@ -41,9 +45,10 @@ const ScholarProfileRedirectButton = (props: ScholarProfileRedirectButtonProps) 
                         id="scrollableDiv"
                         style={{
                             height: "70vh",
-                            overflow: 'auto',
-                            padding: '0 16px',
-                        }}>
+                            overflow: "auto",
+                            padding: "0 16px",
+                        }}
+                    >
                         <List
                             itemLayout="horizontal"
                             dataSource={scholarAuthor.data?.authors}

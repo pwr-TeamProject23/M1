@@ -11,6 +11,7 @@ const useScopusAuthor = (author_lastname: string, author_firstname: string) => {
         queryKey: ["author_scopus", author_firstname, author_lastname],
         queryFn: () => getAuthorScopus(author_lastname, author_firstname),
         staleTime: 60 * 60 * 1000,
+        retry: 1,
     })
 }
 
@@ -25,9 +26,11 @@ const ScopusProfileRedirectButton = (props: ScopusProfileRedirectButtonProps) =>
     const scopusAuthor = useScopusAuthor(props.author_firstname, props.author_firstname)
     const authorsLength = scopusAuthor.data?.authors?.length
 
-    if (!props.url && !scopusAuthor.data) {
-        scopusAuthor.refetch()
-    }
+    useEffect(() => {
+        if (!props.url && !scopusAuthor.data) {
+            scopusAuthor.refetch()
+        }
+    }, [props.url, scopusAuthor.data])
 
     useEffect(() => {
         if (scopusAuthor.data?.authors.length === 1 && scopusAuthor.data.authors[0].orcid) {
@@ -51,9 +54,10 @@ const ScopusProfileRedirectButton = (props: ScopusProfileRedirectButtonProps) =>
                         id="scrollableDiv"
                         style={{
                             height: "70vh",
-                            overflow: 'auto',
-                            padding: '0 16px',
-                        }}>
+                            overflow: "auto",
+                            padding: "0 16px",
+                        }}
+                    >
                         <List
                             itemLayout="horizontal"
                             dataSource={scopusAuthor.data?.authors}
