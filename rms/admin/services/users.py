@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 
-from rms.admin.services.models import User, UserWithPermissions, UserGroup, UserPermission, UserUpdateModel
+from rms.admin.services.models import User, UserWithPermissions, UserGroup, UserPermission, UserUpdateModel, \
+    UserCreateModel
 from rms.auth.managers import UserManager, GroupManager
 
 
@@ -59,3 +60,15 @@ def partial_user_update(db: Session, id_: int, fields: UserUpdateModel) -> UserW
     UserManager.create(db, user)
 
     return get_detailed_user(db, id_)
+
+
+def create_user(db: Session, user_data: UserCreateModel) -> UserWithPermissions:
+    new_user = UserManager.create_user(
+        db,
+        email=user_data.email,
+        password=user_data.password,
+        first_name=user_data.first_name,
+        last_name=user_data.last_name
+    )
+
+    return get_detailed_user(db, new_user.id)

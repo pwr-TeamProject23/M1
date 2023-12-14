@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from rms.admin.services import list_all_users, get_detailed_user, list_all_permissions, list_all_groups, UserUpdateModel
+from rms.admin.services import list_all_users, get_detailed_user, list_all_permissions, list_all_groups, UserUpdateModel, UserCreateModel, create_user
 from rms.admin.services.users import partial_user_update
 from rms.auth.dependencies import get_current_user
 from rms.auth.models import UserOrm
@@ -48,3 +48,9 @@ def list_permissions_view(db: Session = Depends(get_db)):
 @router.get("/groups")
 def list_groups_view(db: Session = Depends(get_db)):
     return list_all_groups(db)
+
+
+@router.post("/users")
+def create_user_view(body: UserCreateModel, db: Session = Depends(get_db),
+                             user: UserOrm = Depends(get_current_user)):
+    return create_user(db, body)
