@@ -37,7 +37,7 @@ def process_file(stream: BinaryIO) -> PdfArticleData:
 
     return PdfArticleData(
         name=data.name,
-        keywords=text_keywords.tolist(),
+        keywords=text_keywords,
         authors=data.authors,
         eisej_id=data.eisej_id,
     )
@@ -148,15 +148,15 @@ class ModelKeywordsExtractor:
         ]
         self.content = "\n".join(self.pages_of_interest)
 
-    @on_error(return_value=np.array([]))
-    def extract(self) -> NDArray:
+    @on_error(return_value=[])
+    def extract(self) -> list[str]:
         if settings.use_keyword_extraction_model:
-            from rms.file_processing.services.keyword_extractor import keyword_extractor
+            from rms.file_processing.services.keyword_extractor import extract_keywords
 
             content = self.content[self._start_of_range() :]
 
-            return keyword_extractor(content)
-        return np.array([])
+            return extract_keywords(content)
+        return []
 
     def _start_of_range(self):
         try:

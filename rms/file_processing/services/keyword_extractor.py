@@ -8,7 +8,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 
-class KeywordExtractor(TokenClassificationPipeline):
+class ML16Model(TokenClassificationPipeline):
     def __init__(self, model, *args, **kwargs):
         super().__init__(
             model=AutoModelForTokenClassification.from_pretrained(model),
@@ -26,4 +26,8 @@ class KeywordExtractor(TokenClassificationPipeline):
 
 
 model_name = "ml6team/keyphrase-extraction-kbir-inspec"
-keyword_extractor = KeywordExtractor(model=model_name)
+model = ML16Model(model=model_name)
+
+
+def extract_keywords(text: str) -> list[str]:
+    return model(text).tolist()
