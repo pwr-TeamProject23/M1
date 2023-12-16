@@ -150,7 +150,7 @@ class ModelKeywordsExtractor:
 
     @on_error(return_value=[])
     def extract(self) -> list[str]:
-        if settings.use_keyword_extraction_model:
+        if not settings.use_keyword_extraction_model:
             from rms.file_processing.services.keyword_extractor import extract_keywords
 
             content = self.content[self._start_of_range() :]
